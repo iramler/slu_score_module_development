@@ -1,0 +1,160 @@
+---
+title: "lax"
+format: html
+---
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+WLAX <- read_csv("jtyrrell/lacrosse_women_ncaa_div1_2022_2023.csv") |> mutate(draw_pctg = draw_pctg * 100, 
+                             win_pctg = win_pctg * 100)
+```
+
+# women regression model
+
+```{r}
+ggplot(WLAX, aes(x = draw_pctg, y = win_pctg)) +
+  geom_point(color = "blue", alpha = 0.7) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Winning the Draw vs. Winning the Game",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+
+# women regression line
+```{r}
+model <- lm(win_pctg ~ draw_pctg, data = WLAX)
+summary(model)
+```
+
+-  for every 1% increase in draw win percentage, game win percentage increases by 2.4478 %
+
+- p = 0.0000000000000002, depicting that draw percentage significantly affects win percentage
+
+- R^2 = 0.5016, so the model explains 50.16% of the variation in win percentage
+
+- Residual Standard Error: 
+ RSE of 14.95 means that, on average, the model's predictions are off by about 14.95 units (percentage points)
+
+
+# women polynomial regression model
+```{r}
+library(ggplot2)
+
+ggplot(LAX, aes(x = draw_pctg, y = win_pctg)) +
+  geom_point(color = "blue", alpha = 0.7) +  # Scatter plot
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), color = "red", se = TRUE) +
+  labs(title = "Polynomial Regression: Winning the Draw vs. Winning the Game",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+
+```
+
+```{r}
+model_poly <- lm(win_pctg ~ poly(draw_pctg, 2), data = LAX)
+summary(model_poly)
+```
+
+# men regression model
+```{r}
+MLAX <- read_csv("jtyrrell/lacrosse_men_ncaa_div1_2022_2023.csv") |> mutate(faceoff_win_pct = faceoff_win_pct * 100,
+                                                                          win_loss_pctg = win_loss_pctg * 100)
+
+
+```
+
+```{r}
+ggplot(MLAX, aes(x = faceoff_win_pct, y = win_loss_pctg)) +
+  geom_point(color = "blue", alpha = 0.7) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Winning the Draw vs. Winning the Game",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+# men regression line
+```{r}
+model2 <- lm(win_loss_pctg ~ faceoff_win_pct, data = MLAX)
+summary(model2)
+```
+
+-  for every 1% increase in draw win percentage, game win percentage increases by 1.5024 %
+
+- p = 0.000001637, depicting that draw percentage significantly affects win percentage
+
+- R^2 = 0.2815, so the model explains 28.15% of the variation in win percentage
+
+- Residual Standard Error:
+ RSE of 17.49 means that, on average, the model's predictions are off by about 17.49 units (percentage points)
+
+
+
+- Men: for every 1% increase in draw win percentage, game win percentage increases by 1.5024%
+- Women: for every 1% increase in draw win percentage, game win percentage increases by 2.4478%
+- Winning the draw/faceoff has more impact on who wins the game for women compared to men
+
+
+- Men: p = 0.000001637, depicting that draw percentage significantly affects win percentage
+- Women: p = 0.00000000000000022, depicting that draw percentage significantly affects win percentage
+
+- Men: R^2 = 0.2815, so the model explains 28.15% of the variation in win percentage
+- Women: R^2 = 0.5016, so the model explains 50.16% of the variation in win percentage
+
+- men:  RSE of 17.49 means that, on average, the model's predictions are off by about 0.8537 units (percentage points)
+- women: RSE of 14.95 means that, on average, the model's predictions are off by about 0.709 units (percentage points)
+
+Overall conclusions: 
+
+- Winning the draw is a statistically significant predictor of game win percentage for both men and women. However, the effect is stronger for women, as indicated by a higher coefficient, a higher R² value, and a lower RSE.
+- The model explains a larger portion of the variation in women's game win percentage than in men's, suggesting that draw win percentage is a more reliable predictor of game outcomes for women.
+
+
+# both men and women
+
+```{r}
+WMLAX <- read_csv("jtyrrell/lacrosse_men_and_women_ncaa_div1_2022_2023.csv") |> mutate(faceoff_win_pct = faceoff_win_pct * 100,                                                              win_loss_pctg = win_loss_pctg * 100)
+
+WMLAX$Division <- as.factor(WMLAX$Division)
+```
+
+# regression model with indicators
+```{r}
+ggplot(WMLAX, aes(x = faceoff_win_pct, y = win_loss_pctg, color = Division)) +
+  geom_point(alpha = 0.7) +  
+  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +  
+  labs(title = "Polynomial Regression: Draw Wins vs. Game Wins",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+
+```{r}
+WMmodel <- lm(win_loss_pctg ~ faceoff_win_pct + Division, data = WMLAX)
+summary(WMmodel)
+
+```
+# interaction model
+
+```{r}
+model_interaction <- lm(win_loss_pctg ~ faceoff_win_pct * Division, data = WMLAX)
+summary(model_interaction)
+
+```
+
+- The interaction term (β = 0.9454, p = 0.0084) suggests that for women’s teams, the effect of faceoff/draw win percentage on game win percentage is 0.9454% higher than for men’s teams.
+draw percentage and win percentage relationship 
+make a plot that shows it, what type model is best 
+regression model 
+- both men’s and women’s teams benefit from winning more faceoffs/draws, but the impact is stronger for women
+- p-values for the interaction and division terms are statistically significant (p < 0.01), confirming that gender plays a role in this relationship
+
+
+
+
+assess regression line 
+
+next: bring men in 
+
+module to teach people the need for indicator variables
