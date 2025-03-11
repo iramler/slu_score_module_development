@@ -41,7 +41,7 @@ ui <- fluidPage(
   )
 )
 
-# Server ----
+# Server -- -
 server <- function(input, output) {
   output$statPlot <- renderPlot({
     data <- clark_df[1:as.numeric(input$games), ] # Filter games based on selection
@@ -56,6 +56,5 @@ server <- function(input, output) {
       theme_minimal()
   })
 }
-
 # Run the App ----
 shinyApp(ui = ui, server = server)
