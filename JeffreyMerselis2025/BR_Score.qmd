@@ -18,7 +18,7 @@ editor: visual
 * before 2024, positional rules required two guards, two forwards, and one center per team, could look at that
 
 # Issues
-* 2025 dataset is wierd bc of trades and has people listed twice
+* 2025 dataset is weird bc of trades and has people listed twice
 
 ```{r}
 library(tidyverse)
