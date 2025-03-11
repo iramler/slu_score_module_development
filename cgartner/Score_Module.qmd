@@ -13,6 +13,8 @@ Make side by side plots using facet wrap.
 
 Have them make/observe graphs and see what the relation is.
 
+
+load packages
 ```{r}
 library(readr)
 library(dplyr)
