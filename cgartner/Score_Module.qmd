@@ -3,7 +3,7 @@ title: "Score Module"
 format: html
 ---
 
-Make a database out of all of the data sets I have.
+Make a database out of all of the data sets.
 
 Make a three score modules: R, Python, SQL.
 
