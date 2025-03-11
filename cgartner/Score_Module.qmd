@@ -5,7 +5,7 @@ format: html
 
 Make a database out of all of the data sets I have.
 
-Make a three score modules: R, Python, SQL
+Make a three score modules: R, Python, SQL.
 
 Could include extracting certain drivers or teams and compare.
 
@@ -143,7 +143,8 @@ dbGetQuery(con, "
     JOIN qualifying q ON res.raceId = q.raceId AND res.driverId = q.driverId
     JOIN drivers d ON res.driverId = d.driverId
     
-    ORDER BY starting_position ASC
+    ORDER BY starting_position ASC.
 ")
 ```
+
 
