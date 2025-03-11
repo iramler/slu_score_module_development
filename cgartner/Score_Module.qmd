@@ -9,7 +9,7 @@ Make a three score modules: R, Python, SQL
 
 Could include extracting certain drivers or teams and compare.
 
-Make side by side plots using facet wrap
+Make side by side plots using facet wrap. 
 
 Have them make/observe graphs and see what the relation is.
 
