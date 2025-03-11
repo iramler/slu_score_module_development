@@ -1,0 +1,59 @@
+---
+author: "Abby Sikora"
+---
+
+```{r} 
+library(shiny)
+library(tidyverse)
+library(readr)
+library(here)
+library(rvest)
+
+url4 <- "https://herhoopstats.com/stats/ncaa/player/caitlin-clark-stats-11eb2f34-a838-c400-aa81-12df17ae4e1e/"
+
+h4 <- read_html(url4)
+
+tab4 <- h4 |> html_nodes("table")
+
+clark_df <- tab4[[2]] |> html_table(fill = TRUE)
+
+# Clean Data
+clark_df$PTS <- gsub(",", "", clark_df$PTS) # Remove commas
+clark_df$PTS <- as.integer(clark_df$PTS)    # Convert to integer
+
+# Fix column names
+colnames(clark_df) <- make.names(colnames(clark_df))
+
+clark_df
+```
+
+Exploring the Data: all data lines up with a certain year of her career
+
+Caitlin Clark college basketball full career data
+
+season: freshman - senior year (2020-2024)
+
+team: irrelevant
+
+G: Games played per season
+
+GS: irrelevant
+
+MIN: minutes played per year
+
+PTS: Probably focus in this -> points per season
+
+What next?: 
+- change season to freshman through senior to order data better in the shiny app
+- focus on PTS, FTM vs FTA (FT%)
+
+- Clean up app
+
+
+
+
+
+
+
+
+

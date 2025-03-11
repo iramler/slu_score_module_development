@@ -2,3 +2,31 @@
 author: "Abby Sikora"
 ---
 
+```{r}
+library(shiny)
+library(tidyverse)
+library(readr)
+library(here)
+library(rvest)
+library(dplyr)
+
+# Clean Data
+clark_df$PTS <- gsub(",", "", clark_df$PTS) 
+clark_df$PTS <- as.integer(clark_df$PTS)
+
+# Change 'Season' to Class Year FIRST
+clark_df1 <- clark_df |>
+  mutate(season = case_when(
+    season == "2020-21" ~ "First-year",
+    season == "2021-22" ~ "Sophomore",
+    season == "2022-23" ~ "Junior",
+    season == "2023-24" ~ "Senior",
+    TRUE ~ season
+  )) |> 
+  # THEN Select only the desired columns
+  select(season, PTS, FGM, FTM, X3PM, FGA)
+
+clark_df1
+ 
+```
+
