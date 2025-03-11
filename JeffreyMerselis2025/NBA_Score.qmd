@@ -32,34 +32,15 @@ olympics_data <- tables[[1]]
     -   and include past aperances in the prediction
     -   currrent season + past olympic performances vs the season from that olympics
     -   so only use the past olympics in refrence to that NBA season of the same year
+- Issues with Olympics
+  - different format and rules (i.e. 3 point line)
+  - how do you judge how a player will play with teammates they've never had
+  - some players just randomly do well at the Olympics (Carmelo Anthony)
+  - who are they playing, another USA team or a different country? What year?
 
 ```{r}
 NBA.24.df <- nba_data |> select(-Rk, -Team, -Age, -Pos, -Awards, -G, -GS)
 Olympic.24.df <- olympics_data |> select(-Team, -G)
-```
-
-```{r}
-team_usa_players <- olympics_data |>
-  filter(Team == "United States") |>
-  select(Player)
-
-team_usa_stats <- nba_data |>
-  inner_join(olympics_data,
-             by = "Player",
-             suffix = c("_NBA", "_Olympics"))
-
-stat_cols <- setdiff(colnames(team_usa_stats), c("Player", "Team"))
-
-for (stat in stat_cols) {
-  if (grepl("_NBA$", stat)) {
-    base_stat <- sub("_NBA$", "", stat)
-    team_usa_stats[[paste0(base_stat, "_Change")]] <-
-      team_usa_stats[[paste0(base_stat, "_Olympics")]] - team_usa_stats[[stat]]
-  }
-}
-
-team_usa_model_data <- team_usa_stats |>
-  select(Player, ends_with("_NBA"), ends_with("_Change"))
 ```
 
 ```{r}
