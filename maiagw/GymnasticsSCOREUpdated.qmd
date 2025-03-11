@@ -4,6 +4,8 @@ author: "Maia Wahlquist"
 format: html
 ---
 
+URL: https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html
+
 ```{r}
 library(dplyr)
 library(tidyr)
@@ -44,6 +46,16 @@ summary(mod1)
 
 ```{r}
 anova(mod1)
+```
+
+```{r}
+mod2 = lm(S_Mean ~ E_Mean + D_Mean, data = gymnastics2)
+
+summary(mod2)
+```
+
+```{r}
+anova(mod2)
 ```
 
 ```{r}
