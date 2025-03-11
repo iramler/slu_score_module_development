@@ -2,6 +2,7 @@
 title: "lax"
 format: html
 ---
+
 ```{r}
 library(tidyverse)
 library(ggplot2)
