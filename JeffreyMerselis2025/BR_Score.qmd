@@ -10,9 +10,8 @@ editor: visual
   * somehow compare to all star team
 * Stick with NBA vs Olympics but simpler
   * try to predict a players stats in the Olympics 
-* something to do with clutch factor 
 * draft steals vs busts
-* best possible team from past 24 years
+* best possible team from past ___ years
 
 * add 65 game rule to past teams (introduced in 2024).
 * before 2024, positional rules required two guards, two forwards, and one center per team, could look at that

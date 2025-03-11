@@ -21,7 +21,7 @@ all_seasons_data <- data.frame()
 seasons <- 1980:2024
 
 for (season in seasons) {
-  Sys.sleep(5)  # wait 5 seconds I got limited lol S or s?
+  Sys.sleep(5)  # wait 5 seconds I got limited 
   season_data <- scrape_season(season)
   all_seasons_data <- bind_rows(all_seasons_data, season_data)
 }
