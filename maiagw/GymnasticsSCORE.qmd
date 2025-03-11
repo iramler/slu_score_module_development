@@ -1,0 +1,54 @@
+---
+title: "Gymnastics Data"
+author: "Maia Wahlquist"
+format: html
+---
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(mosaic)
+library(ggplot2)
+# Packages required for Chapter 8
+library(MASS)
+library(mnormt) 
+library(lme4) 
+library(knitr) 
+library(kableExtra)
+```
+
+
+Data set & Wrangling:
+
+```{r}
+library(readr)
+gymnastics <-read_csv("data/data_2022_2023.csv")
+view(gymnastics)
+```
+
+```{r}
+gymnastics2 = gymnastics|> dplyr::select(c(FirstName:Score,-Location, -Date, -Penalty)) |> 
+  group_by(FirstName, Apparatus) |> 
+  summarise(D_Mean = mean(D_Score), E_Mean = mean(E_Score),
+         S_Mean = mean(Score))
+
+view(gymnastics2)
+```
+
+```{r}
+mod1 = lm(E_Mean ~ D_Mean, data = gymnastics2)
+
+summary(mod1) 
+```
+
+```{r}
+anova(mod1)
+```
+
+```{r}
+ggplot(data = gymnastics2, aes(x =  Apparatus, y =S_Mean)) +
+  geom_boxplot(color = "purple4", fill = "plum") +
+  coord_flip()
+```
+

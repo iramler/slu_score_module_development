@@ -1,0 +1,128 @@
+---
+title: "PWHL Worksheet Updated"
+author: "Brendan Karadenes"
+format: html
+---
+
+## Introduction
+
+The Professional Woman’s Hockey League (PWHL) began its inaugural season in 2023-24. The league has players from 11 different countries. The league looks to expand its exposure and gain new fans for the future of the sport.
+We will be investigating the player statistics from the league’s inaugural season. Our focus will be on all players including goalies which includes 147 athletes. We want to discover which age groups and positions have had the most impact on the number of points scored per game by each player. A player is credited with one point for either a goal or an assist. Each position has a different role in contributing to the team. In general, the main goal of the forwards is to stay in three different lanes across the ice, moving the puck between them to make the opposing goalie move and open scoring opportunities. The defensive players compliment the forwards by positioning themselves along the boundary of the offensive zone to prevent the opposing team from moving the puck away from the zone and provide more opportunities for the forwards to score. The goalie’s focus is to guard their team’s goal by positioning themselves in front of it to prevent the opposing team from scoring. The different age groups represent a blend of experience and athleticism at a point in the player’s career. More experience should help the player score more goals because they would have more knowledge of the game and ideas on how to score. However, more experience comes with more aging and players with more experience may be past their years of peak athleticism. That is why our goal is to find if there is a perfect blend between the two (i.e. an ideal age and position group), while keeping in mind that the older players may not be representative of all players who enter the league. Consider this definition of "survivorship bias": [The Decision Lab](https://thedecisionlab.com/biases/survivorship-bias)
+
+## Data Description
+
+PWHL_Final - Name of the data set
+P_Per_GP - Number of points scored by the player per game played (Goals + Assists)
+Pos – Position of the player (either Defense (D), Forward (F), or Goalie (G))
+Age – Age of the player in years
+
+**Exercises**
+
+```{r}
+# Load in the necessary packages and data
+library(tidyverse)
+library(here)
+PWHL_Final <- read.csv(here("Your-Directory/PWHL_Final.csv"))
+```
+
+The density plot below displays the distribution of goals per game played for each position. Use it to answer the following two questions.
+
+```{r}
+ggplot(data = PWHL_Final) + 
+  geom_density(aes(P_Per_GP, color = Pos, fill = Pos), alpha = 0.25) +
+  theme_minimal()
+```
+
+1. Data Visualization
+Firstly, what would you need to add to the code below to add a title and change the x-axis label to "Points Per Game Played"?
+
+```{r}
+ggplot(data = PWHL_Final) + 
+  geom_density(aes(P_Per_GP, color = Pos, fill = Pos), alpha = 0.25) +
+  theme_minimal() # your code here
+```
+
+2. Interpretation 
+It is now necessary to visualize this data. Describe the distribution of the Forward and Defense positions in the density plot above. Make sure to mention shape and skew. Give a possible reason why the Goalie’s curve is concentrated around zero in this visual. For reference, there are 13 goalies in the dataset compared to 92 forwards and 42 defensive players.
+
+
+
+3. Data Wrangling
+Next, fill in the code below to create different age groups and filter out goalies from the dataset. Make 3 different age groups: Call ages 22-25 "youngest", ages 26-30 "middle", and ages 31-36 "oldest". There should be 53 athletes in the youngest group, 62 in the middle group, and 19 in the oldest group.
+
+```{r}
+# Making the different age groups and filtering out goalies
+PWHL_Graph <- PWHL_Final %>%
+  mutate(Age_Group = case_when(
+
+    
+    
+  )) %>%
+  filter() # filter out goalies
+PWHL_Graph <- PWHL_Graph %>%
+  mutate(Age_Group = factor(Age_Group, levels = c("youngest", "middle", "oldest")))
+```
+
+In the following question use the boxplots below.
+
+```{r}
+ggplot(data = PWHL_Graph, mapping = aes(x = Age_Group, y = P_Per_GP)) +
+  geom_boxplot() +
+  labs(x = "Age Group", y = "Points Per Game Played", title = "Points per Game Played by Age Group") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r}
+ggplot(data = PWHL_Graph, mapping = aes(x = Pos, y = P_Per_GP)) +
+  geom_boxplot() + 
+  labs(x = "Position", y = "Points Per Game Played", title = "Points per Game Played by Position") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5)) 
+```
+
+4. Interpreting Trends
+Using the boxplots above, brainstorm some ideas on which combinations of age and positions would be ideal for a player to maximize the number of points per game played. Explain.
+
+
+
+
+
+
+
+
+5. Making Comparisons
+Following this, let’s put this all together on one graph to see the trends between the age groups and positions. Create side-by-side boxplots that display the points per game for each group. Only include the Forward and Defense positions (since we already showed how few points goalies score). Make sure to add a theme and change the x and y axis labels. Refer to the data description on the second page. Once completed, get into small groups and decide whose graph displays the data the best and why. Try switching the variables between x, y, and color to see if it improves your visualization.
+
+```{r}
+# your code here
+
+```
+
+
+6. Identifying Trends and Bias
+Using the graph above, what trends, if any, do you see? Does it confirm your original thoughts in question 3? What seems to be the ideal position and age group to maximize goals per game played? Could another explanation, such as the fact that only the most successful players remain in the league longer, contribute to this trend?
+
+
+
+
+
+
+7. Critical Thinking and Reasoning
+Now, give one reason why you think older forwards have the most points per game compared to the other age groups?
+survivorship
+data collection
+
+
+
+
+
+
+8. Data Interpretation
+Finally, reread the summary at the top of the file. What might be a limitation to this dataset.
+
+
+
+
+
+

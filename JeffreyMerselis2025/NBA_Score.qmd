@@ -1,0 +1,91 @@
+---
+title: "Basketball Score Module"
+author: "Jeffrey Merselis"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyverse)
+library(rvest)
+library(shiny)
+```
+
+```{r}
+url <- "https://www.basketball-reference.com/leagues/NBA_2024_per_game.html"
+page <- read_html(url)
+tables <- page |> html_table(fill = TRUE)
+nba_data <- tables[[1]]
+url <- "https://www.basketball-reference.com/international/mens-olympics/2024_per_game.html"
+page <- read_html(url)
+tables <- page |> html_table(fill = TRUE)
+olympics_data <- tables[[1]]
+```
+
+# TODO
+
+-   American stars stats drop bc there are so many on one team, foreign players stats go up or down. Like ex. Rui Hachimura avg 13pts in the NBA season but was 1 of 2 NBA players for Japan and avg 22 pts in the Olympics. Giannis was the only NBA player on the Greek team and his went down.
+-   make var that is num of NBA teammates
+-   Might be better to do "can this team win the Olympics" then team vs team
+-   could then also do will this team win NBA championship
+-   could do, make a team and see how well they do at the Olympics
+    -   and include past aperances in the prediction
+    -   currrent season + past olympic performances vs the season from that olympics
+    -   so only use the past olympics in refrence to that NBA season of the same year
+- Issues with Olympics
+  - different format and rules (i.e. 3 point line)
+  - how do you judge how a player will play with teammates they've never had
+  - some players just randomly do well at the Olympics (Carmelo Anthony)
+  - who are they playing, another USA team or a different country? What year?
+
+```{r}
+NBA.24.df <- nba_data |> select(-Rk, -Team, -Age, -Pos, -Awards, -G, -GS)
+Olympic.24.df <- olympics_data |> select(-Team, -G)
+```
+
+```{r}
+ui <- fluidPage(
+  titlePanel("NBA (Regular Season) vs. Olympics Stats"),
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("player", "Choose a Player:", 
+                  choices = intersect(NBA.24.df$Player, Olympic.24.df$Player))
+    ),
+    mainPanel(
+      plotOutput("comparison_plot")
+    )
+  )
+)
+
+server <- function(input, output) {
+  
+  output$comparison_plot <- renderPlot({
+    req(input$player) 
+
+    nba_stats <- NBA.24.df |> filter(Player == input$player)
+    olympics_stats <- Olympic.24.df |> filter(Player == input$player)
+
+    stat_names <- colnames(nba_stats)[colnames(nba_stats) != "Player"]
+    
+    nba_long <- nba_stats |>
+      select(-Player) |>
+      pivot_longer(cols = everything(), names_to = "Stat", values_to = "Value") |>
+      mutate(Source = "NBA")
+    
+    olympics_long <- olympics_stats |>
+      select(-Player) |>
+      pivot_longer(cols = everything(), names_to = "Stat", values_to = "Value") |>
+      mutate(Source = "Olympics")
+    
+    combined_stats <- bind_rows(nba_long, olympics_long)
+
+    ggplot(combined_stats, aes(x = Stat, y = Value, fill = Source)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      labs(title = paste("Stat Comparison:", input$player), y = "Stat Value", x = "Stat") +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 45, hjust = 1))
+  })
+}
+
+shinyApp(ui = ui, server = server)
+```

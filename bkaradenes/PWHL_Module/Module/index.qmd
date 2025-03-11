@@ -21,11 +21,11 @@ categories:
 
 ### Introduction
 
-For this activity, you will be exploring the goals scored by the different positions and age groups in the Professional Woman's Hockey League [PWHL](https://www.quanthockey.com/pwhl/en/seasons/pwhl-players-stats.html){target="_blank"} during the 2023-24 regular season.
+For this activity, you will be exploring the points scored by the different positions and age groups in the Professional Woman's Hockey League [PWHL](https://www.quanthockey.com/pwhl/en/seasons/pwhl-players-stats.html){target="_blank"} during the 2023-24 regular season.
 
 Specifically, you will examine visualizations provided, create your own visualizations, and create new variables in the data set.
 
-Visualizing these statistics is useful for several reasons. Displaying graphics provides the reader with an easy-to-understand idea of how scoring can differ among different age groups and positions. Also, allowing the student to work with the data and create new variables allows them to deepen their understanding of the newly formed league. It can identify which age groups and positions are most likely to score the most goals in a given season. Although not the main goal of the data set, analyses like these can inform strategies to either prevent or score goals, highlight an ideal age range, and inspire teams to maximize the number of goals from each position.
+Visualizing these statistics is useful for several reasons. Displaying graphics provides the reader with an easy-to-understand idea of how scoring can differ among different age groups and positions. Also, allowing the student to work with the data and create new variables allows them to deepen their understanding of the newly formed league. It can identify which age groups and positions are most likely to score the most points in a given season. Although not the main goal of the data set, analyses like these can inform strategies to either prevent or score points, highlight an ideal age range, and inspire teams to maximize the number of points from each position.
 
 ::: {.callout-note collapse="true" title="Activity Length" appearance="minimal"}
 This activity would be suitable for an in-class example or quiz.
@@ -34,7 +34,7 @@ This activity would be suitable for an in-class example or quiz.
 ::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
 By the end of the activity, you will be able to:
 
-1.  Construct visualizations using ggplot
+1.  Construct visualizations using ggplot and plotnine.
 
 2.  Analyze data using boxplots and density plots.
 
@@ -42,11 +42,11 @@ By the end of the activity, you will be able to:
 :::
 
 ::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
-For this activity, students will primarily use functions from the tidyverse package and basic graph analysis skills. Students will require previous knowledge of R.
+For this activity, students will primarily use functions from the tidyverse package and basic graph analysis skills. Students will require previous knowledge of R and python. For python users, seaborn and pandas will be required.
 :::
 
 ::: {.callout-note collapse="true" title="Technology Requiremens" appearance="minimal"}
-The provided worksheets are designed to be done by hand, but can also be done using R.
+The provided worksheets are designed to be done by hand, but can also be done using R or python.
 
 Since the data are provided, instructors are encouraged to modify the worksheets to have students practice other statistical concepts in their preferred software.
 :::
@@ -62,7 +62,7 @@ Download Data
 <summary><b>Variable Descriptions</b></summary>
 
 | Variable   | Description                                                           |
-|---------------------|---------------------------------------------------|
+|---------------|---------------------------------------------------------|
 | Rk         | League ranking for number of total points                             |
 | Name       | First and last name of the player                                     |
 | Age        | Age in years of the player                                            |
@@ -95,5 +95,5 @@ We provide an editable Microsoft Word handout along with it's key.
 [Class handout - with key](PWHL_WS_KEY.docx)
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
-In conclusion, the Professional Woman's Hockey League worksheet provides excellent learning opportunities for mid-level statistics students in several ways. It allows them to understand and practice using key functions in the tidyverse r package. Also, student's can properly analyze visualizations they make and ones given to them. Furthermore, student's have the opportunity to use their creativity by using the data to create new variables that can help them analyze different parts of the data set. This gives the students unique exposure to a newly formed league and gives them the opportunity to make findings on how goals are scored in the league. Overall, this handout allows student's to investigate the inaugural season of the PWHL and draw meaningful conclusions about player performances across different age groups and positions.
+In conclusion, the Professional Woman's Hockey League worksheet provides excellent learning opportunities for mid-level statistics students in several ways. It allows them to understand and practice using key functions in the tidyverse r package. Also, student's can properly analyze visualizations they make and ones given to them. Furthermore, student's have the opportunity to use their creativity by using the data to create new variables that can help them analyze different parts of the data set. This gives the students unique exposure to a newly formed league and gives them the opportunity to make findings on how points are scored in the league. Overall, this handout allows student's to investigate the inaugural season of the PWHL and draw meaningful conclusions about player performances across different age groups and positions.
 :::

@@ -1,0 +1,42 @@
+---
+title: "birthday problem"
+format: html
+---
+
+```{r}
+# Load the necessary library
+library(dplyr)
+
+# Read the CSV files
+data1 <- read.csv("US_births_1994-2003_CDC_NCHS.csv")
+data2 <- read.csv("US_births_2000-2014_SSA.csv")
+
+# Combine the data row-wise
+combined_data <- bind_rows(data1, data2)
+
+# do people match bdays in the room? yes or no?
+
+# probs function in the sample function 
+
+# probability
+# make function and check for duplicates
+duplicate <- function(n) {
+  
+birthdays <- sample(1:365, n, replace = TRUE)
+  any(duplicated(birthdays))
+}
+
+
+# run simulations
+simulate <- function(n, trials = 10000) {
+  count <- sum(replicate(trials, duplicate(n)))  # Count successes
+  return(count / trials)
+}
+
+# test function
+simulate(5)
+
+# true/false
+duplicate(30)
+```
+
