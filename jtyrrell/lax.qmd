@@ -62,7 +62,6 @@ summary(model_poly)
 MLAX <- read_csv("jtyrrell/lacrosse_men_ncaa_div1_2022_2023.csv") |> mutate(faceoff_win_pct = faceoff_win_pct * 100,
                                                                           win_loss_pctg = win_loss_pctg * 100)
 
-
 ```
 
 ```{r}
@@ -123,8 +122,8 @@ WMLAX$Division <- as.factor(WMLAX$Division)
 ```{r}
 ggplot(WMLAX, aes(x = faceoff_win_pct, y = win_loss_pctg, color = Division)) +
   geom_point(alpha = 0.7) +  
-  geom_smooth(method = "lm", formula = y ~ poly(x, 2), se = TRUE) +  
-  labs(title = "Polynomial Regression: Draw Wins vs. Game Wins",
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), se = TRUE) +  
+  labs(title = "Regression Model: Draw Wins vs. Game Wins",
        x = "Draw Win Percentage",
        y = "Game Win Percentage") +
   theme_minimal()
@@ -143,10 +142,9 @@ summary(model_interaction)
 
 ```
 
-- The interaction term (β = 0.9454, p = 0.0084) suggests that for women’s teams, the effect of faceoff/draw win percentage on game win percentage is 0.9454% higher than for men’s teams.
-draw percentage and win percentage relationship 
-make a plot that shows it, what type model is best 
-regression model 
+- Men’s Effect (Baseline): Every 1% increase in faceoff win percentage increases men’s win percentage by 1.5024%.
+Women’s Effect (Men’s Slope + Interaction Term): Every 1% increase in draw win percentage for women’s teams increases their win percentage by 1.5024% + 0.9454% = 2.4478%.
+- This shows that for women, a 1% increase in draw win percentage leads to a 2.4478% increase in game win percentage...compared to 1.5024% for men
 - both men’s and women’s teams benefit from winning more faceoffs/draws, but the impact is stronger for women
 - p-values for the interaction and division terms are statistically significant (p < 0.01), confirming that gender plays a role in this relationship
 
