@@ -15,15 +15,20 @@ editor: visual
 
 * add 65 game rule to past teams (introduced in 2024).
 * before 2024, positional rules required two guards, two forwards, and one center per team, could look at that
+* use random forest mod over glm
+* compare glm and rf mods
+* add "awards" as categorical var.
+* add shiny app or some vis stuff
 
 # Issues
-* 2025 dataset is weird bc of trades and has people listed twice
+* 2025 data set is weird bc of trades and has people listed twice
 
 ```{r}
 library(tidyverse)
 library(rvest)
 library(shiny)
 library(ggplot2)
+library(randomForest)
 ```
 
 ```{r}
@@ -87,11 +92,84 @@ best_players_25 <- nba25_df |> arrange(desc(predictions)) |> head(25)
 best_players_25 |> select(Player, Pos, predictions)
 ```
 
+# Random Forest 
 
+```{r}
+rf_model_v1 <- randomForest(
+  all_nba_1st ~ .,
+  data = train_data |> select(-Season, -Rk, -Player, -Team, -Pos) |> na.omit(),  
+  ntree = 500,
+  importance = TRUE
+)
+```
 
+### TODO: Fix whole dataset not just these
 
+```{r}
+names(train_data) <- gsub("%", "_pct", names(train_data))
+names(train_data) <- gsub("/", "_per_", names(train_data))
+names(train_data) <- gsub(" ", "_", names(train_data))
+names(test_data) <- gsub("%", "_pct", names(test_data))
+names(test_data) <- gsub("/", "_per_", names(test_data))
+names(test_data) <- gsub(" ", "_", names(test_data))
+names(train_data) <- gsub("^3P", "ThreeP", names(train_data))
+names(train_data) <- gsub("^3PA", "ThreePA", names(train_data))
+names(train_data) <- gsub("^3P_pct", "ThreeP_pct", names(train_data))
+names(test_data) <- gsub("^3P", "ThreeP", names(test_data))
+names(test_data) <- gsub("^3PA", "ThreePA", names(test_data))
+names(test_data) <- gsub("^3P_pct", "ThreeP_pct", names(test_data))
+names(train_data) <- gsub("^2P", "TwoP", names(train_data))
+names(train_data) <- gsub("^2PA", "TwoPA", names(train_data))
+names(train_data) <- gsub("^2P_pct", "TwoP_pct", names(train_data))
+names(test_data) <- gsub("^2P", "TwoP", names(test_data))
+names(test_data) <- gsub("^2PA", "TwoPA", names(test_data))
+names(test_data) <- gsub("^2P_pct", "TwoP_pct", names(test_data))
+```
 
+```{r}
+train_med <- train_data |>
+  mutate(across(everything(), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
 
+test_med <- test_data |>
+  mutate(across(everything(), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+x_train <- train_med |> select(-Season, -Rk, -Player, -Team, -Pos, -all_nba_1st)
+y_train <- as.factor(train_med$all_nba_1st)  # THIS MAKES IT CLASSIFICATION
+```
+
+```{r}
+rf_model_v2 <- randomForest(
+  x = x_train,
+  y = y_train,
+  ntree = 500,
+  importance = TRUE
+)
+```
+
+```{r}
+test_med <- test_med |>
+  mutate(predictions = predict(rf_model_v2, newdata = test_med, type = "prob")[,2])
+
+top_5_rf <- test_med |> arrange(desc(predictions)) |> head(15)
+top_5_rf |> select(Player, predictions)
+```
+
+```{r}
+# Plot variable importance
+varImpPlot(rf_model_v2)
+```
+
+```{r}
+# train_data_rf <- train_data |> select(-Season)
+# train_data_rf <- na.roughfix(train_data_rf)
+# 
+# rf_model <- randomForest(
+#   all_nba_1st ~ .,
+#   data = train_data_rf,
+#   ntree = 500,
+#   importance = TRUE
+# )
+```
 
 
 
