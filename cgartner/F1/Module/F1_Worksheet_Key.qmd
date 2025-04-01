@@ -1,8 +1,12 @@
 ---
-title: "F1_Worksheet"
+title: "F1_Module"
 format: html
 editor: visual
 ---
+
+The density plot below displays the distribution of goals per game played for each position. Use it to answer the following two questions.
+
+Use the following graph to answer the questions.
 
 1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for selected_drivers to just filter out the two drivers of interest.
 
@@ -11,7 +15,8 @@ library(ggplot2)
 library(dplyr)
 
 # Define selected drivers
-selected_drivers <- 
+#ANSWER: c("max_verstappen","hamilton")
+selected_drivers <- c("max_verstappen","hamilton")
 
 # Create a new column to categorize drivers
 f1_df <- f1_df |> 
@@ -34,6 +39,7 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
 2). Notice how the graph doesn't appear to contain enough data points. Why might this be the case, and what could you add in the code to fix this?(add c("max_verstappen","hamilton"))
 
 ```{r}
+#ANSWER ADD gemo_jitter()
 # Define selected drivers
 selected_drivers <- c("max_verstappen","hamilton")
 
@@ -48,6 +54,7 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
        x = "Grid Position",  
        y = "Race Position",  
        color = "Driver") +  
+  geom_jitter()+
   theme_minimal() +  
   scale_x_continuous(limits = c(1, 20)) +  # Restrict grid to typical F1 positions (1 to 20)  
   scale_y_continuous(limits = c(0, 20)) +  # Restrict position to typical race positions (0 to 20)  
@@ -61,7 +68,14 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
 selected_drivers <- c("hamilton", "max_verstappen")
 f1_df_filtered <- f1_df |>
   filter(driverRef %in% selected_drivers)
-
+---------------------------------------------------------------------
+#ANSWER
+#Plot the density distribution of points for Hamilton and Verstappen
+ggplot(data = f1_df_filtered) + 
+  geom_density(aes(x = points, color = driverRef, fill = driverRef), alpha = 0.25) + 
+  theme_minimal() +
+  labs(title = "Density Distribution of Points for Hamilton and Verstappen",
+       x = "Points",
+       y = "Density")
 
 ```
-
