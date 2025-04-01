@@ -1,0 +1,205 @@
+--- 
+title: "Rugby Match Analysis"
+output: shiny::shinyApp
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(shiny)
+library(tidyverse)
+library(DT)
+library(ggplot2)
+
+# Load the dataset
+rugby_data <- read.csv("C:\\Users\\User\\Downloads\\archive (6)\\results.csv")
+
+# Clean and prepare data
+rugby_data <- rugby_data %>%
+  mutate(
+    result = case_when(
+      home_score > away_score ~ "Home Win",
+      home_score < away_score ~ "Away Win",
+      TRUE ~ "Draw"
+    ),
+    date = as.Date(date, format="%Y-%m-%d"),
+    year = as.integer(format(date, "%Y"))
+  )
+```
+
+```{r}
+ui <- fluidPage(
+  titlePanel("Rugby Match Analysis"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("home_team", "Select Home Team:", choices = unique(rugby_data$home_team)),
+      selectInput("away_team", "Select Away Team:", choices = unique(rugby_data$away_team)),
+      actionButton("switch_teams", "Switch Teams"),
+      actionButton("analyze", "Analyze Match")
+    ),
+    
+    mainPanel(
+      h3("Historical Match Statistics"),
+      DTOutput("match_stats"),
+      h3("Win Probability"),
+      verbatimTextOutput("win_prob"),
+      h3("Additional Insights"),
+      verbatimTextOutput("extra_stats"),
+      h3("Combined Score Distribution (Both Teams)"),
+      plotOutput("home_score_density"),
+      plotOutput("away_score_density"),
+      plotOutput("combined_score_distribution"),
+      h3("Point Differential Distribution"),
+      plotOutput("win_margin_distribution"),
+      h3("Result Breakdown (Pie Chart)"),
+      plotOutput("result_pie_chart"),
+      h3("Total Score vs. Point Differential"),
+      plotOutput("score_vs_margin")
+    )
+  )
+)
+```
+
+```{r}
+server <- function(input, output, session) {
+  
+  observeEvent(input$switch_teams, {
+    new_home <- isolate(input$away_team)
+    new_away <- isolate(input$home_team)
+    updateSelectInput(session, "home_team", selected = new_home)
+    updateSelectInput(session, "away_team", selected = new_away)
+  })
+  
+  observeEvent(input$analyze, {
+    match_data <- rugby_data %>%
+      filter(home_team == input$home_team & away_team == input$away_team)
+
+    if (nrow(match_data) == 0) {
+      output$match_stats <- renderDT({
+        datatable(data.frame(Message = "No matches found"), options = list(dom = 't'))
+      })
+      output$win_prob <- renderText("Not enough data to calculate probabilities.")
+      output$extra_stats <- renderText("No additional insights available.")
+      output$combined_score_distribution <- renderPlot(NULL)
+      output$win_margin_distribution <- renderPlot(NULL)
+      return()
+    }
+
+    match_data <- match_data %>%
+      mutate(Outcome = case_when(
+        result == "Home Win" ~ "Win",
+        result == "Away Win" ~ "Lose",
+        result == "Draw" ~ "Draw"
+      ))
+
+    total_matches <- nrow(match_data)
+    home_wins <- sum(match_data$result == "Home Win")
+    away_wins <- sum(match_data$result == "Away Win")
+    draws <- sum(match_data$result == "Draw")
+
+    home_win_prob <- (home_wins / total_matches) * 100
+    away_win_prob <- (away_wins / total_matches) * 100
+    draw_prob <- (draws / total_matches) * 100
+
+    avg_home_score <- mean(match_data$home_score, na.rm = TRUE)
+    avg_away_score <- mean(match_data$away_score, na.rm = TRUE)
+
+    largest_margin <- max(abs(match_data$home_score - match_data$away_score), na.rm = TRUE)
+
+    output$match_stats <- renderDT({
+      datatable(match_data %>%
+        select(home_team, home_score, away_team, away_score, competition, Outcome),
+        options = list(pageLength = 200)
+      )
+    })
+
+    output$win_prob <- renderText({
+      paste0("Home Win Probability: ", round(home_win_prob, 2), "%\n",
+             "Away Win Probability: ", round(away_win_prob, 2), "%\n",
+             "Draw Probability: ", round(draw_prob, 2), "%")
+    })
+
+    output$extra_stats <- renderText({
+      paste0("Average Score - ", input$home_team, ": ", round(avg_home_score, 1), "\n",
+             "Average Score - ", input$away_team, ": ", round(avg_away_score, 1), "\n",
+             "Largest Margin of Victory: ", largest_margin, " points\n",
+             "Total Matches Played: ", total_matches)
+    })
+
+    output$home_score_density <- renderPlot({
+      plot_data <- rugby_data %>%
+        filter(home_team == input$home_team | away_team == input$home_team) %>%
+        mutate(score = ifelse(home_team == input$home_team, home_score, away_score),
+               role = "Home")
+
+      ggplot(plot_data, aes(x = score, fill = role)) +
+        geom_density(alpha = 0.5) +
+        labs(title = paste("Overall Score Density for", input$home_team), x = "Score", y = "Density", fill = "Team Role") +
+        scale_fill_manual(values = c("Home" = "blue")) +
+        theme_minimal()
+    })
+
+    output$away_score_density <- renderPlot({
+      plot_data <- rugby_data %>%
+        filter(home_team == input$away_team | away_team == input$away_team) %>%
+        mutate(score = ifelse(home_team == input$away_team, home_score, away_score),
+               role = "Away")
+
+      ggplot(plot_data, aes(x = score, fill = role)) +
+        geom_density(alpha = 0.5) +
+        labs(title = paste("Overall Score Density for", input$away_team), x = "Score", y = "Density", fill = "Team Role") +
+        scale_fill_manual(values = c("Away" = "red")) +
+        theme_minimal()
+    })
+
+    output$combined_score_distribution <- renderPlot({
+      combined_scores <- match_data %>%
+        select(home_team, home_score, away_team, away_score) %>%
+        pivot_longer(cols = c(home_score, away_score), names_to = "type", values_to = "score") %>%
+        mutate(team = ifelse(type == "home_score", home_team, away_team),
+               color = ifelse(type == "home_score", "blue", "red"))
+
+      ggplot(combined_scores, aes(x = score, fill = team)) +
+        geom_density(data = combined_scores %>% filter(type == "home_score"), aes(fill = team), alpha = 0.4) +
+        geom_density(data = combined_scores %>% filter(type == "away_score"), aes(fill = team), alpha = 0.4) +
+        labs(title = "Combined Score Distribution (When These Teams Meet)", x = "Score", y = "Density", fill = "Team") +
+        scale_fill_manual(values = setNames(c("blue", "red"), c(input$home_team, input$away_team)), guide = guide_legend(title = "Team")) +
+        theme_minimal() +
+        scale_x_continuous(breaks = scales::pretty_breaks(n = 10))
+    })
+
+    output$win_margin_distribution <- renderPlot({
+      match_data %>%
+        mutate(point_diff = home_score - away_score) %>%
+        ggplot(aes(x = point_diff)) +
+        geom_histogram(binwidth = 3, color = "black", alpha = 0.7, fill = "green") +
+        labs(title = "Point Differential Distribution", x = paste(input$home_team, "-", input$away_team), y = "Count") +
+        theme_minimal()
+    })
+
+    output$result_pie_chart <- renderPlot({
+      match_data %>%
+        count(Outcome) %>%
+        ggplot(aes(x = "", y = n, fill = Outcome)) +
+        geom_col(width = 1, color = "white") +
+        coord_polar(theta = "y") +
+        theme_void() +
+        labs(title = "Result Breakdown", fill = "Outcome")
+    })
+
+    output$score_vs_margin <- renderPlot({
+      match_data %>%
+        mutate(point_diff = home_score - away_score,
+               total_score = home_score + away_score) %>%
+        ggplot(aes(x = total_score, y = point_diff)) +
+        geom_point(color = "purple", alpha = 0.6) +
+        labs(title = "Total Score vs. Point Differential", x = "Total Match Score", y = "Point Differential") +
+        theme_minimal()
+    })
+  })
+}
+
+shinyApp(ui, server)
+
+```
+
