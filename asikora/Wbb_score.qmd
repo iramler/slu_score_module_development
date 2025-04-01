@@ -51,6 +51,57 @@ What next?:
 
 
 
+```{r}
+# Load necessary libraries
+library(rvest)
+library(dplyr)
+
+# Define the URL
+url <- "https://www.espn.com/womens-college-basketball/player/_/id/4433730/paige-bueckers"
+
+# Read the webpage content
+webpage <- read_html(url)
+
+# Extract tables as a list
+tables <- webpage %>% html_nodes("table") %>% html_table(fill = TRUE)
+
+# Extract the season column from Table 2
+season_table <- tables[[2]] %>% select(1)  # Selecting only the first column (Season)
+
+# Extract the stats columns from Table 3
+stats_table <- tables[[3]]  # Assuming this contains all the numeric stats
+
+# Rename the season column for clarity
+colnames(season_table) <- "Season"
+
+# Merge the two tables by row index
+beuckers_df <- cbind(season_table, stats_table)
+
+# Print the final merged table
+print(beuckers_df)
+
+beuckers_df <- beuckers_df |>
+  mutate(Season = case_when(
+    Season == "2020-21" ~ "First-year",
+    Season == "2021-22" ~ "Sophomore",
+    Season == "2023-24" ~ "Senior",
+    Season == "2024-25" ~ "5th Year",
+    TRUE ~ Season
+  )) |> 
+  # THEN Select only the desired columns
+  select(Season, PTS, `FT%`, `FG%`, `3P%`)
+# Fix column names
+colnames(beuckers_df) <- make.names(colnames(beuckers_df))
+
+```
+
+Which variables would be cool to focud on? 
+
+Missed an entire year bc of torn ACL, took 5th year
+
+These stats are season averages
+
+Modify Clark Data
 
 
 
