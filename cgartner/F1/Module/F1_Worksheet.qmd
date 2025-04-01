@@ -1,7 +1,7 @@
 ---
 title: "F1_Worksheet"
 format: html
-editor: visual
+editor: source
 ---
 
 1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for selected_drivers to just filter out the two drivers of interest.
@@ -11,7 +11,7 @@ library(ggplot2)
 library(dplyr)
 
 # Define selected drivers
-selected_drivers <- 
+selected_drivers <- ____________
 
 # Create a new column to categorize drivers
 f1_df <- f1_df |> 
@@ -64,4 +64,3 @@ f1_df_filtered <- f1_df |>
 
 
 ```
-
