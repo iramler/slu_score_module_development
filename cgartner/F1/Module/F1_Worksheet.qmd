@@ -9,6 +9,9 @@ editor: source
 ```{r}
 library(ggplot2)
 library(dplyr)
+library(readr)
+
+f1_df <- read.csv("f1_results.csv")
 
 # Define selected drivers
 selected_drivers <- ____________

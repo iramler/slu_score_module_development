@@ -126,6 +126,13 @@ f1_df$position[is.na(f1_df$position)] <- 0  # Replace missing race positions wit
 f1_df
 ```
 
+
+```{r}
+write.csv(f1_df, "f1_results.csv", row.names = FALSE)
+
+```
+
+
 ```{r}
 # Plot grid vs position, colored by driver
 ggplot(f1_df, aes(x = grid, y = position, color = driverRef)) +
