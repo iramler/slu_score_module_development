@@ -1,0 +1,67 @@
+---
+title: "F1_Worksheet"
+format: html
+editor: visual
+---
+
+1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for selected_drivers to just filter out the two drivers of interest.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Define selected drivers
+selected_drivers <- 
+
+# Create a new column to categorize drivers
+f1_df <- f1_df |> 
+  mutate(driver_highlight = ifelse(driverRef %in% selected_drivers, driverRef, "Other"))
+
+# Plot grid vs position, highlighting Verstappen and Hamilton
+ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +  
+  geom_point(alpha = 0.7) +  # Scatter plot with transparency  
+  labs(title = "Grid vs Position (Highlighting Verstappen & Hamilton)",  
+       x = "Grid Position",  
+       y = "Race Position",  
+       color = "Driver") +  
+  theme_minimal() +  
+  scale_x_continuous(limits = c(1, 20)) +  # Restrict grid to typical F1 positions (1 to 20)  
+  scale_y_continuous(limits = c(0, 20)) +  # Restrict position to typical race positions (0 to 20)  
+  scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
+
+```
+
+2). Notice how the graph doesn't appear to contain enough data points. Why might this be the case, and what could you add in the code to fix this?(add c("max_verstappen","hamilton"))
+
+```{r}
+# Define selected drivers
+selected_drivers <- c("max_verstappen","hamilton")
+
+# Create a new column to categorize drivers
+f1_df <- f1_df |> 
+  mutate(driver_highlight = ifelse(driverRef %in% selected_drivers, driverRef, "Other"))
+
+# Plot grid vs position, highlighting Verstappen and Hamilton
+ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +  
+  geom_point(alpha = 0.7) +  # Scatter plot with transparency  
+  labs(title = "Grid vs Position (Highlighting Verstappen & Hamilton)",  
+       x = "Grid Position",  
+       y = "Race Position",  
+       color = "Driver") +  
+  theme_minimal() +  
+  scale_x_continuous(limits = c(1, 20)) +  # Restrict grid to typical F1 positions (1 to 20)  
+  scale_y_continuous(limits = c(0, 20)) +  # Restrict position to typical race positions (0 to 20)  
+  scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
+```
+
+3). Given this graph and the start of the code, write the code that outputs this plot.
+
+```{r}
+# Filter data for Lewis Hamilton and Max Verstappen
+selected_drivers <- c("hamilton", "max_verstappen")
+f1_df_filtered <- f1_df |>
+  filter(driverRef %in% selected_drivers)
+
+
+```
+

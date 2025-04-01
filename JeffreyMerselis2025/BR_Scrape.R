@@ -3,6 +3,13 @@
 library(tidyverse)
 library(rvest)
 
+# Old code for getting the 2025 season
+# url <- "https://www.basketball-reference.com/leagues/NBA_2025_per_game.html"
+# page <- read_html(url)
+# tables <- page |> html_table(fill = TRUE)
+# nba_df <- tables[[1]]
+# nba25_df <- nba_df |> mutate(Season = 2025)
+
 scrape_season <- function(season) {
   url <- paste0("https://www.basketball-reference.com/leagues/NBA_", season, "_per_game.html")
   page <- read_html(url)
