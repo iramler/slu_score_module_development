@@ -5,6 +5,12 @@ format: html
 editor: visual
 ---
 
+# NOTES
+
+-   add more "trivial" questions, guide learning
+
+------------------------------------------------------------------------
+
 This qmd file explores using statistical modeling techniques to predict which NBA players are most likely to be selected to the all-NBA first Team in a given season. Using player statistics from 1980 to 2024, we will apply two models --- logistic regression and random forest classification --- to estimate the likelihood of each player's selection. Logistic regression learns for binary outcomes and the models are more simple. Random forests on the other hand, are powerful ensemble models that improve prediction accuracy by combining the results of many decision trees. We'll walk through each step of the modeling process, from data preparation and model training to evaluation and interpretation.
 
 ### Loading Packages
@@ -17,7 +23,7 @@ library(randomForest) # Used to build random forest models
 ### Loading Data
 
 ```{r message=FALSE, warning=FALSE}
-BR_data <- read.csv("~/Documents/Github_repos/stat_289_score/JeffreyMerselis2025/BR_data.csv")
+BR_data <- read.csv("BR_data.csv")
 ```
 
 ### Dataset Column Descriptions
@@ -226,23 +232,31 @@ table(RF_Predicted = rf_pred_class, Actual = test_med$all_nba_1st)
 
 (Assuming nothing has been changed for either model)
 
-Logistic Regression: 
--   **True Negatives (635)**: Correctly predicted 635 players who were not selected. 
--   **True Positives (4)**: Correctly identified 4 all-NBA first team players. 
--   **False Positives (4)**: Incorrectly predicted 4 players would make the team. 
+Logistic Regression:
+
+-   **True Negatives (635)**: Correctly predicted 635 players who were not selected.
+
+-   **True Positives (4)**: Correctly identified 4 all-NBA first team players.
+
+-   **False Positives (4)**: Incorrectly predicted 4 players would make the team.
+
 -   **False Negatives (1)**: Missed 1 player who actually did made the team.
 
 This isn't bad, the logistic regression model performs reasonably well, but it has issues with false positives.
 
 Random Forest:
+
 -   **True Negatives (730)**: Very accurate at predicting players who were not selected.
+
 -   **True Positives (4)**: Correctly identified 4 players again.
+
 -   **False Positives (1)**: Mis-classified one player as selected who was not.
--   **False Negatives (1)**: Missed one player again. 
 
-The random forest model is more conservative. It has fewer false positive errors and matches the logistic model in identifying actual all-NBA selections. 
+-   **False Negatives (1)**: Missed one player again.
 
-**NOTE**: Any missing values in the logistic regression model would have been automatically removed, so that's why there's a big difference in the number of true negatives. 
+The random forest model is more conservative. It has fewer false positive errors and matches the logistic model in identifying actual all-NBA selections.
+
+**NOTE**: Any missing values in the logistic regression model would have been automatically removed, so that's why there's a big difference in the number of true negatives.
 
 The random forest model seems to be more precise, with fewer false positives it's better suited to this problem, especially since all-NBA first team selections are rare so it's important to both correctly identifying the right players and avoiding bad predictions.
 
