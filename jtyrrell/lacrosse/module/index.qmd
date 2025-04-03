@@ -1,0 +1,129 @@
+---
+title: "Correlations in Division 1 Men's and Women's Lacrosse"
+author:
+  - name: Jill Tyrrell
+    affiliation:
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation:
+      - ref: slu
+date: April 5, 2025
+description: How much of an impact does winning the draw/face-off have on the final results of a lacrosse game?
+categories:
+  - Correlation
+---
+
+## Module
+
+### Introduction
+
+Lacrosse has seen tremendous growth over the years, with rising popularity and participation elevating the sport to new levels. This evolution has led to an increase in skilled athletes competing in high-level leagues, such as NCAA Division I lacrosse. In both the men’s and women’s game, gaining possession off the faceoff (men’s) or draw control (women’s) is a crucial factor in determining success. Because of their significant impact, many players specialize in these areas, as securing possession provides teams with valuable offensive opportunities that can greatly influence the outcome of a game.
+
+Data
+
+The data set contains 72 rows and 22 columns. Each row represents a men's lacrosse team at the NCAA Division 1 level from the 2022-2023 season.
+
+| Variable              | Description                                                                                 |
+|-----------------------|---------------------------------------------------------------------------------------------|
+| Team                 | College of the team                                                                         |
+| avg_assists          | Average assists to goals per game                                                           |
+| avg_caused_turnovers | Average turnovers forced by the team per game                                              |
+| clearing_pctg        | Percentage of successful attempts to earn an offensive opportunity after gaining the ball in the team's own half |
+| total_faceoffs       | Total faceoffs taken by a team for the season                                              |
+| faceoff_wins        | Total faceoff wins by a team for the season                                                 |
+| faceoff_win_pct      | Proportion of total faceoff wins out of total faceoffs                                     |
+| avg_goals           | Average goals per game                                                                      |
+| avg_goals_allowed   | Average goals allowed by the team per game                                                 |
+| avg_ground_balls    | Average loose balls picked up by the team per game                                         |
+| man_down_defense_pctg | Proportion of times a team stops the opponent from scoring while man down due to a penalty |
+| man_up_offense_pctg  | Proportion of times the offense scores out of total opportunities while man up            |
+| avg_scoring_margin  | Average margin of goals per game                                                           |
+| opp_clear_pctg      | Opponents' clearing percentage averaged by game                                            |
+| avg_points         | Average team points per game                                                               |
+| avg_saves          | Average saves per game                                                                     |
+| shot_pctg          | Proportion of shots that go in out of total shots                                          |
+| avg_turnovers      | Average turnovers that are directly the fault of a player per game                         |
+| W                  | Total wins by the team                                                                     |
+| L                  | Total losses by the team                                                                   |
+| win_loss_pctg      | Proportion of games won out of total games                                                 |
+
+
+This data set contains 120 rows and 18 columns. Each row represents a women’s lacrosse team at the NCAA Division 1 level from the 2022-2023 season.
+
+| Variable                    | Description |
+|-----------------------------|-------------|
+| Team                        | The name of the women’s NCAA lacrosse team |
+| draw_pctg                   | Draw percentage, the proportion of draw controls won by the team in a game. Equivalent to the faceoff percentage in men’s lacrosse. |
+| turnovers_per_game          | Average number of turnovers committed by the team per game. |
+| sog_per_game                | Shots on goal (SOG) per game, the average number of shots on goal taken by the team. |
+| assists_per_game            | Average number of assists made by the team per game. |
+| caused_turnovers_per_game   | The average number of caused turnovers by the team per game. |
+| clearing_pctg               | Clearing percentage, the rate at which the team successfully clears the ball from defense to offense. |
+| draw_controls_per_game      | The average number of draw controls won by the team per game. |
+| fouls_per_game              | Average number of fouls committed by the team per game. |
+| free_position_pctg          | Free position percentage, the rate of successful free position shots taken by the team. |
+| ground_balls_per_game       | The average number of ground balls scooped by the team per game. |
+| points_per_game             | Average number of total points (goals + assists) scored by the team per game. |
+| save_pctg                   | Save percentage, the proportion of shots on goal saved by the team’s goalkeeper. |
+| goals_allowed_per_game      | Average number of goals allowed by the team’s defense per game. |
+| goals_per_game              | Average number of goals scored by the team per game. |
+| shots_per_game              | Average number of total shots (on goal + off target) taken by the team per game. |
+| shot_pctg                   | Shooting percentage, the proportion of shots on goal that result in a goal. |
+| win_pctg                    | The team’s winning percentage, calculated as the number of wins divided by total games played. |
+
+Note: The table provides a brief description of each variable, but more context and understanding might be required to interpret and analyze these statistics effectively in the context of women’s NCAA lacrosse.
+
+
+The data set contains 192 rows and 6 columns. Each row represents a lacrosse team at the NCAA Division 1 level from the 2022-2023 season. Teams come from both the men's and women's division.
+
+| Variable             | Description                                                      |
+|----------------------|------------------------------------------------------------------|
+| Team                 | College of the team                                              |
+| faceoff_win_pct      | The proportion of faceoffs won out of total faceoffs taken       |
+| shots_per_game       | Average amount of shots per game                                 |
+| shot_pctg            | Proportion of shots that are goals out of total shots            |
+| win_loss_percentage  | Amount of wins out of total games played                         |
+| Division             | The division the team is in (Men's or Women's)                   |
+
+
+
+
+
+References
+
+NCAA Website: Division I Lacrosse
+
+http://stats.ncaa.org/rankings/change_sport_year_div
+
+There are three data sets: 2022-2023 statistics for Men’s teams, 2022-2023 statistics for Women’s teams, and a data set combining the Men’s and Women’s statistics (that only includes the variables available in each of the other two).
+
+::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
+The learning objectives associated with this module are:
+
+-   Statistical Interpretation: Analyzing key regression metrics
+- Comparative Analysis: Comparing the impact of draw wins on game outcomes between men’s and women’s lacrosse to identify differences in predictive strength
+- Interaction Effects: Evaluating how the relationship between draw wins and game wins varies by division and understanding interaction terms in regression.
+
+:::
+
+::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
+
+
+-   Up to date statistics can be obtained using the code available from the [SCORE Data Repository](https://data.scorenetwork.org/lacrosse/lacrosse_ncaa_div1.html){target="_blank"}
+:::
+
+### Materials
+
+[data](lax.qmd) - data sets containing statistics from the 2022-2023 statistics for Men’s teams, 2022-2023 statistics for Women’s teams, and a datas et combining the Men’s and Women’s statistics [SCORE Network Data Repository](https://data.scorenetwork.org/){target="_blank"}
+
+[worksheet](laxworksheet.qmd) - questions about statistical interpretation, comparing the impact of draw wins on game outcomes between men’s and women’s lacrosse to identify differences in predictive strength, and evaluating how the relationship between draw wins and game wins varies by division and understanding interaction terms in regression.
+
+[worksheet answers](worksheet_answers.qmd) - answer key for the worksheet
+
+
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Students should find that overall, winning the draw/faceoff in the women's division is more crucial and important to the games overall outcome than in the men's division.
+:::

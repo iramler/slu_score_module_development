@@ -1,0 +1,99 @@
+---
+title: "lax worksheet"
+format: html
+---
+# Example for Women's data
+# First, download the data and turn decimals into percentages
+```{r}
+library(tidyverse)
+library(ggplot2)
+
+WLAX <- read_csv("jtyrrell/lacrosse_women_ncaa_div1_2022_2023.csv") |> mutate(draw_pctg = draw_pctg * 100, 
+                             win_pctg = win_pctg * 100)
+```
+
+# Next, plot the regression model 
+```{r}
+ggplot(WLAX, aes(x = draw_pctg, y = win_pctg)) +
+  geom_point(color = "blue", alpha = 0.7) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Winning the Draw vs. Winning the Game",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+
+# Next, calculate the regression line
+```{r}
+model <- lm(win_pctg ~ draw_pctg, data = WLAX)
+summary(model)
+```
+
+# Interpret these results (what do these numbers mean?)
+# a.) draw percentage coefficient (2.4478): 
+for every 1% increase in draw win percentage, game win percentage increases by 2.4478 %
+# b.) p value (p = 0.0000000000000002)
+the low P value depicts that draw percentage significantly affects win percentage
+# c.) R^2 value (R^2= 0.5016)
+the model explains 50.16% of the variation in win percentage
+# d.) Residual Standard Error (RSE = 14.95)
+on average, the model's predictions are off by about 14.95 units (percentage points)
+
+# Now you try with the mens data!
+# men's regression model
+```{r}
+MLAX <- read_csv("jtyrrell/lacrosse_men_ncaa_div1_2022_2023.csv") |> mutate(faceoff_win_pct = faceoff_win_pct * 100,
+                                                                          win_loss_pctg = win_loss_pctg * 100)
+
+ggplot(MLAX, aes(x = faceoff_win_pct, y = win_loss_pctg)) +
+  geom_point(color = "blue", alpha = 0.7) +
+  geom_smooth(method = "lm", color = "red", se = TRUE) +
+  labs(title = "Winning the Draw vs. Winning the Game",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+# 1.) Calculate the men's regression line:
+
+
+# 2.) Interpret the results (what do these numbers mean?)
+
+# a.) draw percentage coefficient
+
+# b.) p value
+
+# c.) R^2 value
+
+# d.) Residual Standard Error
+
+# We don't have to analyze men and women separately, we can do them together! Continue with this data set that combines both the men's and women's data
+```{r}
+WMLAX <- read_csv("jtyrrell/lacrosse_men_and_women_ncaa_div1_2022_2023.csv") |> mutate(faceoff_win_pct = faceoff_win_pct * 100,                                                              win_loss_pctg = win_loss_pctg * 100)
+
+WMLAX$Division <- as.factor(WMLAX$Division)
+
+ggplot(WMLAX, aes(x = faceoff_win_pct, y = win_loss_pctg, color = Division)) +
+  geom_point(alpha = 0.7) +  
+  geom_smooth(method = "lm", formula = y ~ poly(x, 1), se = TRUE) +  
+  labs(title = "Regression Model: Draw Wins vs. Game Wins",
+       x = "Draw Win Percentage",
+       y = "Game Win Percentage") +
+  theme_minimal()
+```
+
+# 1.) Calculate the interaction model
+
+# 2.) Interpret results (what do these numbers mean?)
+
+# a.) How do the regression lines differ for men's and women's lacrosse?
+
+# b.) Which division (men's or women's) seems to show a stronger relationship between draw wins and game wins?
+
+# c.) What does this tell you about the importance of winning faceoffs/draws in lacrosse games?
+
+
+
+
+
+
+
