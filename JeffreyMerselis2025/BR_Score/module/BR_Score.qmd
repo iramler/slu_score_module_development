@@ -260,18 +260,21 @@ The random forest model is more conservative. It has fewer false positive errors
 
 The random forest model seems to be more precise, with fewer false positives it's better suited to this problem, especially since all-NBA first team selections are rare so it's important to both correctly identifying the right players and avoiding bad predictions.
 
+## TO BE INCLUDED?
+
 ### Compare Top Predictions to Actual NBA Teams
 
 ```{r}
 predicted_rf <- top_5_rf$Player
-actual_all_nba <- all_nba_actual_2024$Player
+
+all_nba_actual_2024 <- BR_data |> filter(str_detect(Awards, "NBA[123]"))
+
+actual_all_nba <- all_nba_actual_2024$Player # Deleted this dataset and forgot, so remake before this works
 
 intersect(predicted_rf, actual_all_nba)       # correct predictions
 setdiff(predicted_rf, actual_all_nba)         # predicted but not actual (false positives)
 setdiff(actual_all_nba, predicted_rf)         # actual but not predicted (missed)
 ```
-
-## TO BE INCLUDED?
 
 Top 10 Most Important Features from Random Forest
 
