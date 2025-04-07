@@ -10,7 +10,7 @@ author:
     affiliation:
       - ref: slu
 date: April 3, 2025
-description: How can be predict which team will beat another team based on certain visualizations?
+description: How can we predict which team will beat another team based on certain visualizations?
 categories:
   - Densities
 ---
