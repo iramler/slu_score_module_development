@@ -1,0 +1,78 @@
+---
+title: "Rugby Union Result Exploration"
+author:
+  - name: Alix du Plessis
+    affiliation:
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation:
+      - ref: slu
+date: April 3, 2025
+description: How can be predict which team will beat another team based on certain visualizations?
+categories:
+  - Densities
+---
+
+## Module
+
+### Introduction
+
+Rugby is a internationally followed sport where giants of the sport have been competing against each other since the 1800's. The Rugby Union ([RU](https://www.world.rugby/){target="_blank"}) is the organization associated with the sport of Rugby with the specified rules and metrics we understand about the game. This is an important distinction from Rugby League or Rugby 7's, which are completely other sports. When The term Rugby Union appears, it will typically refer to club and international level teams but has historical consisted of commonwealth countries and over the centuries we have found that the nations who still dominate and consist of the same 10 nations who boast some of the oldest rivalries in sport. 
+
+The data set for this project was taken from Kaggle which contained every match ever played between the top nations, until the end of 2023 [Kaggle](https://www.kaggle.com/datasets/lylebegbie/international-rugby-union-results-from-18712022){target="_blank"}. Each row contains the match played by the between two of the nations, in order starting in 1871. There are multiple variables in the data set giving the score of each team in terms of home and away team, and gives additional information such venue and tournament information. 
+
+::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
+The learning objectives associated with this module are:
+
+-   Being able to predict a winner based on visualizations. 
+
+-   Picking interesting data points and explain why they are interesting. 
+:::
+
+### Data
+
+This data set has 2783 rows with each rows containing the exact match statistics of every match played. These rows have 11 columns with match information & statistics.
+
+<details>
+
+<summary><b>Variable Descriptions</b></summary>
+
+| Variable       | Description                                                                   |
+|--------------------------|----------------------------------------------|
+| date           | YYYY/MM/DD                                                                    |
+| home_team      | The Home Team in the contest                                                  |
+| away_team      | The Away Team in the contest                                                  |
+| home_score     | The score from the home team                                                  |
+| away_score     | The score from the away team                                                  |
+| competition    | Type of competition they played in                                            |
+| stadium        | The stadium where the match was played                                        |
+| city           | The city where the match was played                                           |
+| country        | The country where the match was played                                        |
+| neutral        | TRUE/FALSE whether the venue was neutral or not                               |
+| world_cup      | TRUE/FALSE whether the match was a world cup match                            |
+
+
+
+**Data Source**
+
+The data is obtained from the Kaggle [Kaggle](https://www.kaggle.com/datasets/lylebegbie/international-rugby-union-results-from-18712022){target="_blank"}.
+
+</details>
+
+### Materials
+
+[results.csv](results.csv) - data set containing statistics from every Rugby Union match found on by following the link to Kaggle, and downloading the csv. 
+
+Questions and Solutions:
+
+[Rugby Union Questions and Walkthrough.docx](Rugby%20Union%20Questions%20and%20Walkthrough.docx) - Questions about data visualizations
+
+[Rugby Union Answers.docx](Rugby%20Union%20Answers.docx) - Answers about data visualizations
+
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Comparing different densities of team scores and looking at point differentials can be a useful visualization in order to make
+predictions for Rugby Union games. 
+:::
