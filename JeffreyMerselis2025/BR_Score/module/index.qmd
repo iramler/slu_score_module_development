@@ -22,22 +22,22 @@ This qmd file explores using statistical modeling techniques to predict which NB
 ::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
 The learning objectives associated with this module are:
 
--   Something 1
+-   Understand the difference between logistic regression and random forest models.
 
--   Somethig else
-:::
+-   Fit and interpret a logistic regression model 
 
-::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
--   What the worksheet has/data it gives 
+-   Train and evaluate a random forest model
 
--   scrape explination
+-   Interpret a correlation matrix
+
+-   Evaluate model performance
+
+-   Compare model accuracy and prediction behavior
 :::
 
 ### Data
 
-description of data
-
-<details>
+The dataset used in this project contains individual player statistics from every NBA season between 1980 and 2024, scraped from basketball-reference.com. Each row represents one player’s season
 
 <summary><b>Variable Descriptions</b></summary>
 
@@ -76,25 +76,17 @@ description of data
 | **Awards** | List of awards (e.g., MVP, NBA1, DPOTY), blank if none |
 | **Season** | Year of the season |
 
-::: {.callout-note collapse="true" title="Important Baskerball Terms" appearance="minimal"}
-**This might:** not be needed but I'll keeo it here for a min
-:::
-
 **Data Source**
 
-The data is obtained from the BasketballReference.com, a website that has indepth statistics on the NBA, WNBA, NCAA basketball, and international basketball. [Basketball Reference](basketball-reference.com/){target="_blank"}.
+The data is obtained from the Basketball-Reference.com, a website that has in-depth statistics on the NBA, WNBA, NCAA basketball, and international basketball. [Basketball Reference](basketball-reference.com/){target="_blank"}.
 
 </details>
 
 ### Materials
 
-[BR_data.csv](BR_data.csv) - Dataset containing statistics from the 1980 to 2024 NBA seasons scraped from [Basketball Reference](https://www.basketball-reference.com/){target="_blank"}
+[BR_data.csv](BR_data.csv) - Dataset
 
-[BR_score.qmd](BR_score.qmd) - description
-
-Solutions for questions:
-
-Dont have yet
+[BR_score.qmd](BR_score.qmd) - Worksheet
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
 Students should find that random forest works better.
