@@ -1,0 +1,103 @@
+---
+title: "Formula 1 2021 World Championship"
+author:
+  - name: Charlie Gartner
+    affiliation:
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation:
+      - ref: slu
+date: April 2, 2024
+description: Visualizing F1 data
+categories:
+  - Correlation
+---
+
+## Module
+
+### Introduction
+
+Formula 1 is one of the most popular motorsports in the world, known for its high speed, innovative technology, and luxury. The season is made up of 22 Grand Prix held around the world with 20 drivers in each race. There are 10 construcstors (teams), each having two drivers. Generally, each grand prix has a practice session, a qualifying session which makes up the starting grid, and then the race. 
+
+The data set for this activity was taken from kaggle [Formula1](https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020/data?select=qualifying.csv){target="_blank"}. The dataset in this activity was made by combining many different data sets and is cleaned so it only has data from the 2021 season. Each row has every driver with their corresponding team from every grand prix from the 2021 season. It also contains data from their qualifying position (starting position) and finishing position as well as their points from each race. 
+
+
+::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
+The learning objectives associated with this module are:
+
+-   Being able to write R code to filter and visualize data.
+
+-   Observing trends from a graph.
+:::
+
+::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
+-   The handout provides a graph that will need to be created. 
+
+-   Up to date statistics can be obtained using the code available from the [SCORE Data Repository](https://data.scorenetwork.org/disc_sports/DGPT24.html){target="_blank"}
+:::
+
+### Data
+
+This data set has 440 rows with each rows containing every race from the 2021 season for each driver. These rows have 11 columns with race statistics.
+
+<details>
+
+<summary><b>Variable Descriptions</b></summary>
+
+| Variable           | Description                                                   |
+|--------------------|---------------------------------------------------------------|
+| raceId            | Unique identifier for the race                                |
+| driverId          | Unique identifier for the driver                              |
+| driverRef         | Reference code or short name for the driver                   |
+| constructorId     | Unique identifier for the constructor                         |
+| constructorRef    | Reference code or short name for the constructor              |
+| grid              | Starting grid position of the driver                          |
+| position          | Final finishing position of the driver                        |
+| points           | Points earned by the driver in the race                        |
+| fastestLapSpeed  | Speed of the driver's fastest lap in the race                 |
+| stop             | Number of pit stops made by the driver                         |
+| driver_highlight | Key highlight or notable performance aspect for the driver     |
+
+
+::: {.callout-note collapse="true" title="F1 Scoring" appearance="minimal"}
+**Scoring:**  
+1st place: 25 points <br>  
+2nd place: 18 points <br>  
+3rd place: 15 points <br>  
+4th place: 12 points <br>  
+5th place: 10 points <br>  
+6th place: 8 points <br>  
+7th place: 6 points <br>  
+8th place: 4 points <br>  
+9th place: 2 points <br>  
+10th place: 1 point  
+:::
+
+**Data Source**
+
+The data is obtained from Kaggle ([Formula1](https://www.kaggle.com/datasets/rohanrao/formula-1-world-championship-1950-2020/data?select=qualifying.csv){target="_blank"}).
+
+</details>
+
+### Materials
+
+[F1-2021.csv](f1_results.csv) - data set containing statistics from the 2021 F1 season found on the [SCORE Network Data Repository](https://data.scorenetwork.org/){target="_blank"}
+
+[F1_Worksheet.qmd](DGPT24_questions.docx) - Worksheet to practice identifying trends and writing R code to create graphs. 
+
+
+[F1_Handout.docx](F1_Handout.docx) - Handout to reference graph you will need to create. 
+
+Solutions for questions:
+
+[F1_Worksheet_Key.qmd](F1_Worksheet_Key.qmd) - Worksheet Key to check answers
+
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Students should feel more comfortable noticing trends based on a graph and understanding what it means. Also, understanding basic plotting ideas in ggplot. 
+:::
+
+
+

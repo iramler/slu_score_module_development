@@ -4,17 +4,21 @@ format: html
 editor: source
 ---
 
-1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for selected_drivers to just filter out the two drivers of interest.
+The 'f1_df' dataset shows data from the 2021 F1 season, where it came down to the last race for the championship to be decided between Lewis Hamilton and Max Verstappen. The dataset includes data from all 20 drivers over the 22 races. The goal of this module is to visualize some of the data throughout the season, specifically between the two title contenders.
 
 ```{r}
 library(ggplot2)
 library(dplyr)
 library(readr)
 
-f1_df <- read.csv("f1_results.csv")
+f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/stat_289_score/cgartner/F1/Module/f1_results.csv")
+```
 
+1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for 'selected_drivers \<-' to just filter out the two drivers of interest.
+
+```{r}
 # Define selected drivers
-selected_drivers <- ____________
+selected_drivers <- #ANSWER
 
 # Create a new column to categorize drivers
 f1_df <- f1_df |> 
@@ -34,7 +38,7 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
 
 ```
 
-2). Notice how the graph doesn't appear to contain enough data points. Why might this be the case, and what could you add in the code to fix this?(add c("max_verstappen","hamilton"))
+2). Notice how the graph doesn't appear to contain enough data points. There should be twenty data points from each of the 22 races. Why might this be the case? Add to the code to fix this.
 
 ```{r}
 # Define selected drivers
@@ -57,13 +61,17 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
   scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
 ```
 
-3). Given this graph and the start of the code, write the code that outputs this plot.
+3). Comment on the relationship between grid position and race position. Also, note any notable races that might not follow the overall trend.
+
+4). What trends or observations do you see for each driver individually
+
+5). Given this graph and the start of the code, write the code that outputs this plot. Comment on the shape of the distribution of points throughout the seaon.
 
 ```{r}
 # Filter data for Lewis Hamilton and Max Verstappen
 selected_drivers <- c("hamilton", "max_verstappen")
 f1_df_filtered <- f1_df |>
   filter(driverRef %in% selected_drivers)
-
+#Write code here
 
 ```

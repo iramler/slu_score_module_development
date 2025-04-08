@@ -1,0 +1,28 @@
+---
+title: "F1_Handout"
+format: html
+editor: visual
+---
+
+```{r}
+library(tidyr)
+library(readr)
+library(ggplot2)
+```
+
+```{r}
+f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/stat_289_score/cgartner/F1/Module/f1_results.csv")
+# Filter data for Lewis Hamilton and Max Verstappen 
+selected_drivers <- c("hamilton", "max_verstappen")
+f1_df_filtered <- f1_df |> 
+  filter(driverRef %in% selected_drivers)
+
+# Plot the density distribution of points for Hamilton and Verstappen
+ggplot(data = f1_df_filtered) + 
+  geom_density(aes(x = points, color = driverRef, fill = driverRef), alpha = 0.25) + 
+  theme_minimal() + 
+  labs(title = "Density Distribution of Points for Hamilton and Verstappen", 
+       x = "Points", 
+       y = "Density")
+
+```

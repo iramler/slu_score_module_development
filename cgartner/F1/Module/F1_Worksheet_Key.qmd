@@ -4,19 +4,19 @@ format: html
 editor: visual
 ---
 
-The density plot below displays the distribution of goals per game played for each position. Use it to answer the following two questions.
+```{r}
+library(ggplot2)
+library(dplyr)
+library(readr)
+
+f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/stat_289_score/cgartner/F1/Module/f1_results.csv")
+```
 
 Use the following graph to answer the questions.
 
 1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for selected_drivers to just filter out the two drivers of interest.
 
 ```{r}
-library(ggplot2)
-library(dplyr)
-library(readr)
-
-f1_df <- read.csv("f1_results.csv")
-
 # Define selected drivers
 #ANSWER: c("max_verstappen","hamilton")
 selected_drivers <- c("max_verstappen","hamilton")
@@ -64,14 +64,18 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
   scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
 ```
 
-3). Given this graph and the start of the code, write the code that outputs this plot.
+3). Comment on the overall relationship between grid position and race position for the entire grid. Also, note any notable races that might not follow the overall trend. ANSWER There appears to be a positive relationship between grid position and final race position. One notable race was when max verstappen started 20th and finished 2nd.
+
+4). What trends or observations do you see for each driver individually ANSWER Lewis Hamilton has one race where he started top 5 but finished 15th. Max Verstappen has a similiar race where he finsihed 9th. Overall, Max Verstappen generally has a better starting grid position than Lewis Hamilton.
+
+5). Given the start of the code and the plot, write the code that outputs this plot. Comment on the shape of the distribution of points throughout the seaon. .
 
 ```{r}
 # Filter data for Lewis Hamilton and Max Verstappen
 selected_drivers <- c("hamilton", "max_verstappen")
 f1_df_filtered <- f1_df |>
   filter(driverRef %in% selected_drivers)
----------------------------------------------------------------------
+
 #ANSWER
 #Plot the density distribution of points for Hamilton and Verstappen
 ggplot(data = f1_df_filtered) + 
@@ -81,4 +85,7 @@ ggplot(data = f1_df_filtered) +
        x = "Points",
        y = "Density")
 
+
 ```
+
+ANSWER Both of these graphs are skewed to the left. Hamilton finished most of his races scoring 15-25 points where Max Verstappen had more races where he scored zero points and then there are peaks at around 18 and 25 whereas Hamilton finished the most of his races at 20 points.
