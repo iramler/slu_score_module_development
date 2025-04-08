@@ -43,14 +43,6 @@ MIN: minutes played per year
 
 PTS: Probably focus in this -> points per season
 
-What next?: 
-- change season to freshman through senior to order data better in the shiny app
-- focus on PTS, FTM vs FTA (FT%)
-
-- Clean up app
-
-
-
 ```{r}
 # Load necessary libraries
 library(rvest)
@@ -79,6 +71,12 @@ beuckers_df <- cbind(season_table, stats_table)
 
 # Print the final merged table
 print(beuckers_df)
+```
+
+They will have to complete these parts for tidying
+
+```{r}
+#To make app easier for viewer, change the "Season" Variable to represent class rank instead of numeric year
 
 beuckers_df <- beuckers_df |>
   mutate(Season = case_when(

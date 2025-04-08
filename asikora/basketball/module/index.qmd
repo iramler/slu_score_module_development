@@ -1,0 +1,110 @@
+---
+title: "Women's NCAA Basketball - Building a shiny app"
+author:
+  - name: Abby Sikora
+    affiliation:
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation:
+      - ref: slu
+date: April 3, 2025
+description: How to make an intro shiny app
+categories:
+---
+
+## Module
+
+### Introduction
+
+Women's Division 1 basketball is a rapidly growing sport with a full-fledged professional circuit and tournaments across the country ([WBBALL](https://www.ncaa.com/sports/basketball-women/d1){target="_blank"}). Caitlin Clark has revolutionized women's college basketball with her dynamic scoring ability and deep shooting range, making an indelible impact on the game. Playing a 30-game regular season, her performances have captivated fans, culminating in the NCAA Women's Basketball Tournament, where teams battle for the national championship each year.
+
+The data set for this activity was taken from Caitlin Clark season statistics found on the Her Hoops college basketball statistics website, ([HerHoops](https://herhoopstats.com/stats/ncaa/player/caitlin-clark-stats-11eb2f34-a838-c400-aa81-12df17ae4e1e/){target="_blank"}).
+
+::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
+The learning objectives associated with this module are:
+
+-   Understand the structure and components of a Shiny App
+
+-   Create interactive visualizations and dynamic outputs by integrating R packages
+
+-   Analyze outputs from the Shiny App
+:::
+
+::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
+-   The handout provides a step by step Shiny App creation using Caitlin Clark career data
+
+-   Up to date statistics can be obtained using the code available from the [SCORE Data Repository](https://data.scorenetwork.org/disc_sports/DGPT24.html){target="_blank"}
+:::
+
+### Data
+
+This data set contains 4 rows and 26 columns. Each row represents a single season for Caitlin Clark with statistics.
+
+<details>
+
+<summary><b>Variable Descriptions</b></summary>
+
+| Variable | Description                                                   |
+|----------|---------------------------------------------------------------|
+| season   | calendar year (2020 - 2024)                                   |
+| team     | the team the player is on                                     |
+| G        | the number of games the player has played in a season         |
+| GS       | the number of games in a season                               |
+| MIN      | the number of minutes total the player has played in a season |
+| PTS      | the total count of points scored in a season                  |
+| FGM      | the total number of field goals made                          |
+| FGA      | the total number of field goals attempted                     |
+| FG.      | the percent of field goals made in a season                   |
+| X2PM     | the number of 2 point field goals made                        |
+| X2PA     | the number of 2 point field goals attempted                   |
+| X2P.     | the percent of 2 point field goals made in a season           |
+| X3PM     | the number of 3 point field goals made                        |
+| X3PA     | the number of 3 point field goals attempted                   |
+| X3P.     | the percent of 3 point field goals made in a season           |
+| FTM      | the number of free throws made                                |
+| FTA      | the number of free throws attempted                           |
+| FT.      | the percent of free throws made in a season                   |
+| ORB      | the number of offensive rebounds in a season                  |
+| DRB      | the number of defensive rebounds in a season                  |
+| TRB      | the total number of rebounds in a season                      |
+| AST      | the number of assists in a season                             |
+| TOV      | the number of turnovers by the player in a season             |
+| STL      | the number of steals by the player in a season                |
+| BLK      | the total number of blocks by the player in a season          |
+| PF       | the total number of personal fouls in a season                |
+
+::: {.callout-note collapse="true" title="Important Basketball Terms" appearance="minimal"}
+**Points(PTS):** Points are scored by shooting the ball into the opponent's hoop, with 2 points for regular field goals, 3 points for shots made beyond the three-point line, and 1 point for free throws.
+
+**Field Goals(FGM & FGA):** This is a shot attempted from the court during play
+
+**Rebound(ORB, DRB, TRB):** This is the act of retrieving the ball after a missed field goal or free throw attempt, either by grabbing it off the rim or backboard.
+
+**Free Throw(FTM, FTA):** This is an unopposed attempt to score one point by shooting the ball from the free-throw line, awarded after certain fouls are committed.
+:::
+
+**Data Source**
+
+The data is obtained from the Her Hoops college basketball statistics website. [HerHoops](https://herhoopstats.com/stats/ncaa/player/caitlin-clark-stats-11eb2f34-a838-c400-aa81-12df17ae4e1e/){target="_blank"}.
+
+</details>
+
+### Materials
+
+[Clark.csv](Clark.csv) - Caitlin Clark data set containing statistics from the 2020-2024 seasons [SCORE Network Data Repository](https://data.scorenetwork.org/){target="_blank"}
+
+[Worksheet1.qmd](Worksheet1.qmd) - guided walk through of creating a Shiny App
+
+[Worksheet2.qmd](Worksheet2.qmd) - less guided walk through of creating a Caitlin Clark Shiny App
+
+Solutions for questions:
+
+[Worksheet1_key.qmd](Worksheet1_key.qmd)
+
+[Worksheet2_key.qmd](Worksheet2_key.qmd)
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Students should find that Clark gets progressively better over time in scoring categories. Structure of the module comes from [Mastering a Shiny App](https://mastering-shiny.org/basic-app.html){target="_blank"}
+:::

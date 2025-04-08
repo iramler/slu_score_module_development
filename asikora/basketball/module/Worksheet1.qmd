@@ -1,0 +1,60 @@
+---
+title: "Worksheet 1"
+format: html
+---
+
+A Shiny app is an interactive web application built using the R programming language. It allows users to create dynamic, real-time data visualizations and interfaces with minimal code. Shiny apps are commonly used for data analysis, dashboard creation, and interactive data exploration, enabling users to input data, adjust parameters, and view live updates instantly.
+
+For this activity, we will be focusing on interactive data exploration.
+
+If you haven’t already installed Shiny, install it now with:
+```{r}
+#delete this line after you run it
+install.packages("shiny")
+```
+
+Then load in your current R session:
+```{r}
+library(shiny)
+```
+
+Run this code chunk to view your first Shiny app, and describe what you see:
+
+```{r}
+ui <- fluidPage(
+  "Hello, world!"
+)
+server <- function(input, output, session) {
+}
+shinyApp(ui, server)
+```
+
+Replace your ui with this code and describe what has changed from the initial output:
+
+```{r}
+ui <- fluidPage(
+  selectInput("dataset", label = "Dataset", choices = ls("package:datasets")),
+  verbatimTextOutput("summary"),
+  tableOutput("table")
+)
+```
+
+Now, replace your empty server function with this:
+Click around on the app and describe what you see/notice.
+
+```{r}
+server <- function(input, output, session) {
+  output$summary <- renderPrint({
+    dataset <- get(input$dataset, "package:datasets")
+    summary(dataset)
+  })
+  
+  output$table <- renderTable({
+    dataset <- get(input$dataset, "package:datasets")
+    dataset
+  })
+}
+```
+
+At this point, you have learned the basics of creating a shiny app! See the next module to create your own based on Caitlin Clark basketball statistics. 
+

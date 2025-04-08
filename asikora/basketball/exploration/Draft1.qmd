@@ -1,5 +1,5 @@
 ---
-title: "Shiny Score Module"
+title: "Shiny App Score Module"
 format: html
 ---
 ## Building a Shiny App
@@ -76,8 +76,6 @@ Step 1: Tidy the data
 
 ## KEY (what they will have to complete)
 
-How much should I give them to start, should they do this completely on their own?
-
 ```{r}
 #Change season column to class year
 
@@ -107,6 +105,8 @@ For example, when a user selects a statistic and seasons, the server updates the
 
 This app is simple. It takes user input (selected statistic and seasons) and displays a bar plot of Caitlin Clark’s game stats. The app reacts to changes in input and automatically updates the plot when the user selects different options.
 
+Elaborate more on different Input options
+
 ```{r}
 # UI ----
 ui <- fluidPage(
@@ -118,6 +118,7 @@ ui <- fluidPage(
                               "Field Goals Made" = "FGM",
                               "Free Throws Made" = "FTM",
                               "Field Goals Attempted" = "FGA")),
+      #Have student do this: Add a check boxes with these categories
       checkboxGroupInput("seasons", "Select Seasons:", 
                          choices = c("First-year", "Sophomore", "Junior", "Senior"),
                          selected = c("First-year", "Sophomore", "Junior", "Senior"))
@@ -131,7 +132,7 @@ ui <- fluidPage(
 # Server -- -
 server <- function(input, output) {
   output$statPlot <- renderPlot({
-    data <- #clark_df1 |>     Where student will fill in data
+    data <- clark_df1 |>     #Where student will fill in data
       filter(season %in% input$seasons)  # Filter by selected seasons
     
     ggplot(data, aes(x = season, y = .data[[input$stat]])) +
@@ -220,20 +221,16 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 
-# Assuming `clark_df1` and `beuckers_df1` are already available
-
-# Renaming 'season' in clark_df1 to match 'Season' in beuckers_df1
-
 
 # UI ----
 ui <- fluidPage(
-  titlePanel("Caitlin Clark vs Beuckers Game Stats"),
+  titlePanel("Caitlin Clark vs Paige Beuckers Game Stats"),
   
   sidebarLayout(
     sidebarPanel(
       selectInput("player", "Choose Player:", 
                   choices = c("Caitlin Clark" = "clark", 
-                              "Beuckers" = "beuckers")),
+                              "Paige Beuckers" = "beuckers")),
       selectInput("stat", "Choose Statistic:", 
                   choices = c("Points" = "PTS", 
                               "Field Goals Made %" = "FG%",
@@ -275,8 +272,8 @@ server <- function(input, output) {
     
     # Filter data by selected seasons
     data <- player_data |>
-      filter(Season %in% input$seasons) |>
-      mutate(Season = factor(Season, levels = c("First-year", "Sophomore", "Junior", "Senior")))  # Ordering seasons
+      filter(season %in% input$seasons) |>
+      mutate(season = factor(season, levels = c("First-year", "Sophomore", "Junior", "Senior")))  # Ordering seasons
     
     # Create the plot for the selected stat
     ggplot(data, aes(x = Season, y = .data[[input$stat]])) +
@@ -343,6 +340,17 @@ Possible questions for them to answer:
 
 - Does bringing in more variables make for a better Shiny app?
   - Yes and no, better for more investigation but can be bad for aesthetics and appearance of App
+  
+Ramler comments:
+https://mastering-shiny.org/basic-app.html
+
+Intro Module:
+Copy paste different pieces into basic shiny app with nothing in it
+Have them follow along and comment on what each feature does to the app
+
+Intermediate Module:
+Show them final product have them work backwards
+
 
 
 
