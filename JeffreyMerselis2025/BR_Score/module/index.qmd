@@ -9,7 +9,7 @@ author:
     email: iramler@stlawu.edu
     affiliation:
       - ref: slu
-date: April 3, 2025
+date: April 8, 2025
 description: Learn about and compare two models (Logistic Regression and Random Forest), that will predict NBA players to make the all-NBA first team in a given season. 
 ---
 
@@ -86,7 +86,7 @@ The data is obtained from the Basketball-Reference.com, a website that has in-de
 
 [BR_data.csv](BR_data.csv) - Dataset
 
-[BR_score.qmd](BR_Score.qmd) - Worksheet
+[BR_Score.qmd](BR_Score.qmd) - Worksheet
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
 Students should find that random forest works better.
