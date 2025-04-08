@@ -78,7 +78,7 @@ The dataset used in this project contains individual player statistics from ever
 
 **Data Source**
 
-The data is obtained from the Basketball-Reference.com, a website that has in-depth statistics on the NBA, WNBA, NCAA basketball, and international basketball. [Basketball Reference](basketball-reference.com/){target="_blank"}.
+The data is obtained from the Basketball-Reference.com, a website that has in-depth statistics on the NBA, WNBA, NCAA basketball, and international basketball. [Basketball Reference](https://www.basketball-reference.com/){target="_blank"}.
 
 </details>
 
@@ -86,7 +86,7 @@ The data is obtained from the Basketball-Reference.com, a website that has in-de
 
 [BR_data.csv](BR_data.csv) - Dataset
 
-[BR_score.qmd](BR_score.qmd) - Worksheet
+[BR_score.qmd](BR_Score.qmd) - Worksheet
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
 Students should find that random forest works better.
