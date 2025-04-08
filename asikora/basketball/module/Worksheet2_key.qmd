@@ -41,7 +41,10 @@ clark_df <- tab4[[2]] |> html_table(fill = TRUE)
 You should now have the clark_df data frame, which contains the basketball stats for Caitlin Clark across multiple seasons.
 
 ## Step 2: Clean the Data
-Now we’ll clean up the data a bit to make it easier to work with.
+
+Now we’ll clean up the data a bit to make it easier to work with. Fill in the blanks to obtain a data table with the following characteristics:
+- each range of years is replaced with grade level (ex. 2020-21 changes to "First-year")
+- We don't need every variable the data set contains. Select 5 columns to incude, `season` and `PTS` must be included. - Refactor the grade levels in order
 
 ```{r}
 # Clean Data
@@ -74,6 +77,10 @@ At this point, you have the clark_df1 data frame ready for visualization. You ca
 ## Step 3: Building the UI
 Now let’s move on to the Shiny app itself. Here’s the code for the UI:
 
+Fill in the following:
+- change the title to what you think would fit the Shiny App
+- a `selectInput` that chooses statistics correlating to the variables you selected from the data set.
+
 ```{r}
 # UI ----
 ui <- fluidPage(
@@ -97,6 +104,7 @@ ui <- fluidPage(
 
 ```
 
+Explanation:
 - selectInput: This allows the user to choose which statistic (e.g., points, field goals made) they want to visualize.
 - checkboxGroupInput: This allows the user to select one or more seasons to include in the plot.
 - plotOutput: This is where we’ll display the plot based on the user’s input.
@@ -104,11 +112,15 @@ ui <- fluidPage(
 ## Step 4: Writing the Server Function
 Now it’s time to define the server logic to render the plot based on the user’s selections.
 
+Fill in the folowing code:
+- fill in the correct data set
+- Make sure the `Game_Num` variable is on the x-axis
+
 ```{r}
 # Server ----
 server <- function(input, output) {
   output$statPlot <- renderPlot({
-    data <- clark_df1 %>%
+    data <- clark_df1 |>
       filter(Game_Num %in% input$seasons)  # Filter by selected seasons
     
     ggplot(data, aes(x = Game_Num, y = .data[[input$stat]])) +
@@ -124,6 +136,7 @@ server <- function(input, output) {
 
 ```
 
+Explanation:
 - renderPlot: This function takes care of generating the plot when the user selects different seasons or statistics.
 - ggplot: We're using ggplot2 to create a bar plot based on the selected statistic (input$stat) and the selected seasons.
 
@@ -136,9 +149,9 @@ shinyApp(ui = ui, server = server)
 
 ```
 
+Choose some statistics to compare from first to senior year, and report on your findings. 
 
-
-
+Answers for this will also vary, but students should find that Caitlin Clark got progressively better over each year.
 
 
 
