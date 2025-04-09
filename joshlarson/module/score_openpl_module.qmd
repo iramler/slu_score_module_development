@@ -1,0 +1,93 @@
+---
+title: "Score_module"
+format: html
+editor: visual
+---
+```{r}
+install.packages("quantreg")
+```
+
+```{r}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(quantreg)
+
+```
+
+
+```{r}
+
+openpowerlifting <- read_csv(here::here("joshlarson/data/openpowerlifting-2025-03-22/openpowerlifting-2025-03-22-c4367451.csv"))
+
+```
+
+```{r}
+tidy <-openpowerlifting %>%
+  group_by(Name) %>%
+  arrange(desc(Date), 
+          .by_group = TRUE) %>% # group_by(name) %>%
+  slice(1) %>%                              # slice_max(date, n=1)
+  filter(
+    (Tested == "Yes") 
+    & (Event == "SBD") 
+    & Equipment %in% c("Single-ply","Raw") 
+    & !(Place %in% c("DQ", "NS", "G", "DD"))
+    )%>%
+  drop_na(Age, Best3SquatKg, Best3BenchKg, Best3DeadliftKg) 
+  
+
+
+# DQ, NS, G, DD
+```
+
+```{r}
+write_csv(tidy, "tidy_powerlift.csv")
+```
+
+```{r}
+# Male Podium Lifters
+podium_male<-
+  tidy %>%
+  filter(Sex == "M")
+write_csv(podium_male, "podium_male_lifters.csv")
+```
+
+```{r}
+# Female Podium Lifters
+podium_female<-
+  tidy %>%
+  filter(Sex == "F")
+write_csv(podium_female, "podium_female_lifters.csv")
+
+```
+
+```{r}
+male <- read_csv(here::here("joshlarson/data/podium_male_lifters.csv"))
+female <- read_csv(here::here("joshlarson/data/podium_female_lifters.csv"))
+
+```
+```{r}
+male %>%
+  group_by(AgeClass) %>%
+  arrange((AgeClass))
+
+female %>%
+  group_by(AgeClass) %>%
+  arrange((AgeClass))
+```
+
+```{r}
+install.packages("usethis")
+
+library(usethis)
+use_git_config(user.name = "Jane Doe", user.email = "jane@example.org")
+```
+
+
+
+
+
+
