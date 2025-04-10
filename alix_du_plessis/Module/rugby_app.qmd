@@ -12,7 +12,8 @@ library(ggplot2)
 library(plotly)
 
 # Load the dataset
-rugby_data <- read.csv("results.csv")
+rugby_data <- read.csv("C:\\Users\\User\\Downloads\\archive (6)\\results.csv")
+#rugby_data <- read.csv("results.csv")
 
 # Clean and prepare data
 rugby_data <- rugby_data %>%
