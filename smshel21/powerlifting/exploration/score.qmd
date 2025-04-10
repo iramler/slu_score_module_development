@@ -1,0 +1,269 @@
+---
+title: "Score"
+format: html
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+
+powerlift_raw <- read_csv("C:\Users\sarah\Downloads\openpowerlifting-latest%20%(1)\openpowerlifting-2025-03-29\openpowerlifting-2025-03-29-56319e49.csv")
+
+library(readr)
+powerlift_raw <- read_csv("C:/Users/sarah/Downloads/openpowerlifting-latest (1)/openpowerlifting-2025-03-29/openpowerlifting-2025-03-29-56319e49.csv")
+
+powerlift <- powerlift_raw |>
+  group_by(Name) |>
+  arrange(desc(Date), .by_group = TRUE) |>
+  slice(1)
+
+
+
+
+
+
+
+library(here)
+powerlift <- read_csv("smshel21/powerlifting/exploration/data/powerlifting_data_1.csv")
+
+powerlift <- powerlift_raw |>
+  group_by(Name) |>
+  arrange(desc(Date), .by_group = TRUE) |>
+  slice(1)
+
+#write.csv(powerlift, file = "powerlifting_data_1.csv") 
+```
+
+```{r}
+power <- read.csv("smshel21/data/powerlifting_data.csv")
+
+powerlift_sample <- power |>
+  ungroup() |>
+  #drop_na(# list off the variables you know you want to use)
+  sample_n(10000)
+
+powerlift_sample |>
+  write_csv(file = "powerlift_sample_data.csv")
+```
+
+```{r}
+powerlift <- read.csv("smshel21/data/powerlift_sample_data.csv")
+
+
+powerlift_new <- powerlift |>
+  filter(Event == "SBD") |>
+  filter(Equipment %in% c("Raw", "Single-ply")) |>
+  filter(Place != "DQ") |>
+  filter(Place != "NS") |>
+  drop_na(Place) |>
+  filter(Place != "G") |>
+  filter(Place != "DD") |>
+  drop_na(Age) |>
+  drop_na(AgeClass)
+
+powerlift_new |>
+  group_by(AgeClass) |>
+  tally()
+
+powerlift_new |>
+  write_csv(file = "powerlift_data_new.csv")
+
+powerlift_n <- read.csv("smshel21/powerlifting/exploration/data/powerlift_data_new.csv")
+  
+  
+  
+```
+
+
+# Exploratory Analysis
+```{r}
+ggplot(data = powerlift, aes(x = Equipment, Wilks)) +
+  geom_col()
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = Sex, Best3BenchKg)) +
+  geom_col()
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = BodyweightKg, y = Deadlift2Kg)) +
+  geom_point()
+```
+
+```{r}
+
+```
+
+
+# Test Models
+
+Better - test 1 or test 2?
+```{r}
+test1 <- lm(Wilks ~ Age + BodyweightKg + Best3BenchKg, data = powerlift)
+summary(test1)
+```
+
+```{r}
+test2 <- lm(Wilks ~ Age + BodyweightKg + Best3BenchKg + Best3SquatKg, data = powerlift)
+summary(test2)
+```
+
+Bad predictor (cont)
+```{r}
+rn <- lm(Glossbrenner ~ BodyweightKg + Wilks + Best3SquatKg + Squat2Kg + Age, data = powerlift)
+summary(rn)
+```
+
+
+
+t-values
+```{r}
+# high vs low t-value
+wt <- lm(Dots ~ BodyweightKg + Wilks + Best3SquatKg, data = powerlift)
+summary(wt)
+```
+
+
+# co
+```{r}
+test3 <- lm(TotalKg ~ Best3SquatKg + Best3BenchKg + Best3DeadliftKg, data = powerlift)
+summary(test3)
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = Best3BenchKg, y = TotalKg)) +
+  geom_point()
+```
+
+```{r}
+total <- powerlift |>
+  select(TotalKg, Best3SquatKg, Best3BenchKg, Best3DeadliftKg)
+
+cov(total)
+```
+
+
+```{r}
+#ggplot(data = powerlift, aes(x = Sex, y = Best3DeadliftKg)) +
+ #geom_col()
+```
+
+
+
+The Powerlifting dataset features data from individual lifters during their most recent competitions. Variables include characteristics such as sex, age, birth year and age classes, and division. Other variables include 3 types of weightlifting: squats, benches, and deadlifts. 
+
+- Wilks measures relative strength of weightlifters despite different weight classes
+- Glossbrenner evaluates strength relative to bodyweight
+- Dots is the ratio between bodyweight and the weight lifted
+- Goodlift is the scoring system used
+
+The goal of this module is to attempt to use different variables to predict different aspects of powerlifting or information about the lifter themselves.
+
+
+```{r}
+# males to start -  exploratory
+# ggplot, smooothers - quadratic formula, find appropriate power
+# add females and compare - use to explain difference in fits and how to choose which one out of the two
+# show incorrect models, have them explain why?
+# assume they know higher power and also indicator variables but not both together
+# have them build models for boys and compare different power polynomials
+# use calculus or R to find max value
+
+powerlift$SexIND = ifelse(powerlift$Sex == "M", 1, 0)
+
+
+ggplot(data = powerlift, aes(x = Sex, y = Deadlift3Kg)) +
+  geom_boxplot()
+```
+
+Try to use Deadlift3Kg and Sex to predict Age
+
+a) Create a plot
+```{r}
+ggplot(data = powerlift, aes(x = Age, y = Deadlift3Kg)) +
+  geom_point()
+```
+
+b) Create a model. Are Deadlift3Kg and SexIND useful predictors?
+```{r}
+powerlift$SexIND = ifelse(powerlift$Sex == "M", 1, 0)
+
+age1 <- lm(data = powerlift, Age ~ SexIND + Deadlift3Kg)
+summary(age1)
+```
+
+c) Try Best3DeadliftKg in place of Deadlift3Kg.
+```{r}
+age2 <- lm(data = powerlift, Age ~ SexIND + Best3DeadliftKg)
+summary(age2)
+```
+
+d) Write Model
+
+
+2.
+
+a)
+```{r}
+ggplot(data = powerlift, aes(x = BodyweightKg, y = Best3DeadliftKg)) +
+  geom_point()
+
+ggplot(data = powerlift, aes(x = BodyweightKg, y = Squat3Kg)) +
+  geom_point()
+```
+
+
+b)
+```{r}
+age3 <- lm(data = powerlift, BodyweightKg ~ SexIND + Best3BenchKg)
+summary(age3)
+```
+
+```{r}
+age4 <- lm(data = powerlift, BodyweightKg ~ SexIND + Bench3Kg)
+summary(age4)
+```
+
+c) Try more
+
+```{r}
+ggplot(data = powerlift, aes(x = BodyweightKg, y = Bench3Kg)) +
+  geom_point()
+
+ggplot(data = powerlift, aes(x = BodyweightKg, y = Bench2Kg)) +
+  geom_point()
+```
+
+```{r}
+age4.1 <- lm(data = powerlift, BodyweightKg ~ SexIND + Bench3Kg + Bench2Kg)
+summary(age4.1)
+```
+
+```{r}
+age4.2 <- lm(data = powerlift, BodyweightKg ~ SexIND + Bench3Kg + Bench2Kg + Squat3Kg)
+summary(age4.2)
+```
+
+
+d) Model
+
+
+
+3.
+
+```{r}
+age5 <- lm(data = powerlift, Goodlift ~ SexIND + Glossbrenner + Wilks + Dots + Best3DeadliftKg)
+summary(age5)
+```
+
+```{r}
+age6 <- lm(data = powerlift, Goodlift ~ SexIND + Glossbrenner)
+summary(age6)
+```
+
+
+
+
+
+

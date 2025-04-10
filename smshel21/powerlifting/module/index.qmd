@@ -1,0 +1,84 @@
+---
+title: "Modeling the Impact of Age on Powerlifting "
+author:
+  - name: Sarah Sheldon
+    affiliation:
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation:
+      - ref: slu
+date: "June 13, 2024"
+description: "Exploring the impact of age on powerlifting // In progress"
+editor: 
+  canonical: true
+categories:
+  - High order modeling 
+  - Indicator variables 
+---
+
+## Module
+
+Please note that these material have not yet completed the required pedagogical and industry peer-reviews to become a published module on the SCORE Network. However, instructors are still welcome to use these materials if they are so inclined.
+
+### Introduction
+
+Powerlifting is a sport consisting of three different lifts: Squat, Bench, and Deadlift. Competitors compete against opponents in the same weight class to lift the heaviest possible weights in the three categories.
+
+
+
+
+::: {.callout-note collapse="true" title="Learning Objectives" appearance="minimal"}
+Learning Objectives:
+
+1. How to use smoothers in exploratory plots to help determine what model type to use
+
+2. The relationship between indicator variables and best fit models
+
+3.  Determining usefulness of models
+
+:::
+
+::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
+
+Students are expected to have been exposed to one-sample inference for means (most likely t-intervals). Students will also need to have been exposed to general sampling practices - including common biases or problematics sampling schemes such as convenience samples and self-reported data.
+:::
+
+
+
+### Data
+
+The powerlifting data contains records of competitors from the open powerlifting data set. 
+
+Download data: [dumbbell_barbell_weight_ratio.csv](https://data.scorenetwork.org/data/dumbbell_barbell_weight_ratio.csv){target="_blank"}
+
+<details>
+
+<summary><b>Variable Descriptions</b></summary>
+
+| Variable | Description                                             |
+|----------|---------------------------------------------------------|
+|Name   | Name of the competitor |
+|Sex | Sex of the competitor |
+|Event | |
+|Equipment| Use of equipment during the competition|
+|Age | |
+|AgeClass | |
+|BirthYearClass | |
+|Division | |
+|BodyweightKg | |
+|Best3DeadliftKg | |
+
+</details>
+
+
+### Materials
+
+[Class handout]
+
+[Class handout - with solutions]
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Students should be able to determine the best fit models using exploratory plots and p-values.
+:::

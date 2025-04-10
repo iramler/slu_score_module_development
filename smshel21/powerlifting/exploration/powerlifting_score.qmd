@@ -1,0 +1,58 @@
+---
+title: "Untitled"
+format: html
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+
+powerlift_raw <- read.csv("smshel21/data/openpowerlifting-2025-03-01-e67afafd.csv")
+
+powerlift <- powerlift_raw |>
+  arrange(desc(Date)) |>
+  group_by(Name) |>
+  slice(1)
+  
+```
+
+
+```{r}
+test <- lm(Wilks ~ Age + BodyweightKg + Best3BenchKg, data = powerlift)
+summary(test)
+```
+
+```{r}
+test_all <- lm(data = powerlift, TotalKg ~  Best3DeadliftKg + Dots + Goodlift)
+summary(test_all)
+```
+
+```{r}
+test_dots <- lm(data = powerlift, Dots ~ Sex + TotalKg + Best3SquatKg + Best3BenchKg + Goodlift)
+summary(test_dots)
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = TotalKg, y = Goodlift)) +
+  geom_point()
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = Sex, y = TotalKg)) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = AgeClass, y = TotalKg)) +
+  geom_boxplot()
+```
+
+```{r}
+ggplot(data = powerlift, aes(x = AgeClass, y = Dots)) +
+  geom_boxplot()
+
+ggplot(data = powerlift, aes(x = AgeClass, y = Wilks)) +
+  geom_boxplot()
+
+```
+

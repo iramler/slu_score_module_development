@@ -1,0 +1,92 @@
+---
+title: "Score Worksheet Rough Draft"
+author: "Sarah Sheldon"
+format: 
+  html:
+    embed-resources: true
+---
+
+The Powerlifting dataset features data from individual lifters during their most recent competitions. Variables include characteristics such as sex, age, birth year and age classes, and division. Other variables include 3 types of weightlifting: squats, benches, and deadlifts. 
+
+- Wilks measures relative strength of weightlifters despite different weight classes
+- Glossbrenner evaluates strength relative to bodyweight
+- Dots is the ratio between bodyweight and the weight lifted
+- Goodlift is the scoring system used
+- AgeClass: age group competed in
+- Age: Age of the participant
+- Best3DeadliftKg: highest weight deadlifted out of the 1kg, 2kg, and 3kg lifts (i.e. best out of 3?)
+- Sex: Sex of the participant
+
+- edits made to original data set:
+  - now an equal amount of age classes (500 each)
+  - got rid of non-numeric entries in the place variable
+  - got rid of missing/blank values in Age and AgeClass
+
+For this worksheet, we want to use Sex and Age as predictors for Best3DeadliftKg.
+
+1. 
+a) Create a scatterplot comparing Age and Best3DeadliftKg. Add a smoother to incorporate one sex. What do you notice about the curve? 
+```{r}
+library(tidyverse)
+powerlift <- read.csv("smshel21/data/powerlift_sample_data_updated.csv")
+
+
+powerlift$SexIND = ifelse(powerlift$Sex == "M", 1, 0)
+
+powerlift_m <-  powerlift |>
+  filter(Sex == "M")
+
+ggplot(data = powerlift_m, aes(x = Age, y = Best3DeadliftKg)) +
+  geom_point() +
+  geom_smooth(aes(colour = Sex))
+```
+
+
+
+
+
+b) By just looking at the graph, what type of model should be used?
+
+
+
+
+
+c) Now, add another smoother using y ~ poly(x, 2) to compare to the male line. This adds a quadratic curve. Does it fit? Try editing the number to find the curve that best matches.
+```{r}
+ggplot(data = powerlift_m, aes(x = Age, y = Best3DeadliftKg)) +
+  geom_point() +
+  geom_smooth(aes(colour = Sex)) +
+ geom_smooth(aes(colour = Sex), method = "lm", formula = y ~ poly(x, 2))
+```
+
+
+
+
+d) Create a model based off of the curve that best fits. What do you notice?
+
+
+
+
+
+2. Add a smoother that shows the female sex and use y ~ poly(x, 2) to see which curve best fits.
+```{r}
+ggplot(data = powerlift, aes(x = Age, y = Best3DeadliftKg)) +
+  geom_point() +
+  geom_smooth(aes(colour = Sex)) +
+ geom_smooth(aes(colour = Sex), method = "lm", formula = y ~ poly(x, 2))
+```
+
+a. Notice that the female curve best fits a quadratic model based on the graph. However, a quadratic model is incorrect for this situation. Why is that?
+
+
+
+
+b. Create a model to predict Best3DeadliftKg.
+
+
+
+
+
+
+.
+
