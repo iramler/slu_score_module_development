@@ -63,7 +63,7 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
 
 3). Comment on the relationship between grid position and race position. Also, note any notable races that might not follow the overall trend.
 
-4). What trends or observations do you see for each driver individually
+4). What trends or observations do you see for each driver individually? Can you explain why there are quite a few points that are on the x axis?
 
 5). Given this graph and the start of the code, write the code that outputs this plot. Comment on the shape of the distribution of points throughout the seaon.
 
