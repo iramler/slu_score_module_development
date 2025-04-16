@@ -14,8 +14,7 @@ library(readr)
 f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/stat_289_score/cgartner/F1/Module/f1_results.csv")
 ```
 
-1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for 'selected_drivers \<-' to just filter out the two drivers of interest.
-
+1). We are trying to graph the final position based on starting position. We are interested in the overall relationship but also for the two drivers "max_verstappen" and "hamilton". Complete the code for 'selected_drivers <-' to just filter out the two drivers of interest.
 ```{r}
 # Define selected drivers
 selected_drivers <- #ANSWER
@@ -23,7 +22,6 @@ selected_drivers <- #ANSWER
 # Create a new column to categorize drivers
 f1_df <- f1_df |> 
   mutate(driver_highlight = ifelse(driverRef %in% selected_drivers, driverRef, "Other"))
-
 # Plot grid vs position, highlighting Verstappen and Hamilton
 ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +  
   geom_point(alpha = 0.7) +  # Scatter plot with transparency  
@@ -37,17 +35,14 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
   scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
 
 ```
-
-2). Notice how the graph doesn't appear to contain enough data points. There should be twenty data points from each of the 22 races. Why might this be the case? Add to the code to fix this.
-
+2). Notice how the graph doesn't appear to contain enough data points. There should be twenty data points from each of the 22 races. Why might this be the case? Add to the code to fix this.You will also have to fill out the code for selected_drivers as you did above. 
 ```{r}
 # Define selected drivers
-selected_drivers <- c("max_verstappen","hamilton")
+selected_drivers <- #ANSWER
 
 # Create a new column to categorize drivers
 f1_df <- f1_df |> 
   mutate(driver_highlight = ifelse(driverRef %in% selected_drivers, driverRef, "Other"))
-
 # Plot grid vs position, highlighting Verstappen and Hamilton
 ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +  
   geom_point(alpha = 0.7) +  # Scatter plot with transparency  
