@@ -83,7 +83,7 @@ The data is obtained from Kaggle ([Formula1](https://www.kaggle.com/datasets/roh
 
 ### Materials
 
-[F1-2021.csv](f1_results.csv) - data set containing statistics from the 2021 F1 season found on the [SCORE Network Data Repository](https://data.scorenetwork.org/){target="_blank"}
+[F1-2021.csv](f1_results.csv) - data set containing statistics from the 2021 F1 season.
 
 [F1_Worksheet.qmd](DGPT24_questions.docx) - Worksheet to practice identifying trends and writing R code to create graphs. 
 

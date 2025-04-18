@@ -9,7 +9,7 @@ library(ggplot2)
 library(dplyr)
 library(readr)
 
-f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/stat_289_score/cgartner/F1/Module/f1_results.csv")
+f1_df <- read_csv("~/Library/CloudStorage/OneDrive-St.LawrenceUniversity/St. Lawrence/github/slu_score_module_development/cgartner/F1/Data/f1_results.csv")
 ```
 
 Use the following graph to answer the questions.
@@ -64,9 +64,11 @@ ggplot(f1_df, aes(x = grid, y = position, color = driver_highlight)) +
   scale_color_manual(values = c("max_verstappen" = "skyblue", "hamilton" = "red", "Other" = "gray"))  # Assign colors
 ```
 
-3). Comment on the overall relationship between grid position and race position for the entire grid. Also, note any notable races that might not follow the overall trend. ANSWER There appears to be a positive relationship between grid position and final race position. One notable race was when max verstappen started 20th and finished 2nd.
+3). Comment on the overall relationship between grid position and race position for the entire grid. Also, note any notable races that might not follow the overall trend. 
+ANSWER: There appears to be a positive relationship between grid position and final race position. One notable race was when max verstappen started 20th and finished 2nd.
 
-4). What trends or observations do you see for each driver individually ANSWER Lewis Hamilton has one race where he started top 5 but finished 15th. Max Verstappen has a similiar race where he finsihed 9th. Overall, Max Verstappen generally has a better starting grid position than Lewis Hamilton.
+4). What trends or observations do you see for each driver individually? Can you explain why there are quite a few points that are on the x axis?
+ANSWER: Lewis Hamilton has one race where he started top 5 but finished 15th. Max Verstappen has a similiar race where he finsihed 9th. Overall, Max Verstappen generally has a better starting grid position than Lewis Hamilton. The dots on the x-axis represent the starting position but they did not finish the race, possibly due to a crash or technical failure. 
 
 5). Given the start of the code and the plot, write the code that outputs this plot. Comment on the shape of the distribution of points throughout the seaon. .
 
@@ -88,4 +90,4 @@ ggplot(data = f1_df_filtered) +
 
 ```
 
-ANSWER Both of these graphs are skewed to the left. Hamilton finished most of his races scoring 15-25 points where Max Verstappen had more races where he scored zero points and then there are peaks at around 18 and 25 whereas Hamilton finished the most of his races at 20 points.
+ANSWER: Both of these graphs are skewed to the left. Hamilton finished most of his races scoring 15-25 points where Max Verstappen had more races where he scored zero points and then there are peaks at around 18 and 25 whereas Hamilton finished the most of his races at 20 points.

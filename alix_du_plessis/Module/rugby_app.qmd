@@ -12,7 +12,7 @@ library(ggplot2)
 library(plotly)
 
 # Load the dataset
-rugby_data <- read.csv("results.csv")
+rugby_data <- read.csv("C:\\Users\\User\\Downloads\\archive (6)\\results.csv")
 
 # Clean and prepare data
 rugby_data <- rugby_data %>%
@@ -30,7 +30,7 @@ rugby_data <- rugby_data %>%
 ```{r}
 ui <- fluidPage(
   titlePanel("Rugby Match Analysis"),
-  
+
   sidebarLayout(
     sidebarPanel(
       selectInput("home_team", "Select Home Team:", choices = unique(rugby_data$home_team)),
@@ -38,7 +38,7 @@ ui <- fluidPage(
       actionButton("switch_teams", "Switch Teams"),
       actionButton("analyze", "Analyze Match")
     ),
-    
+
     mainPanel(
       h3("Combined Score Distribution (Both Teams)"),
       plotOutput("home_score_density"),
@@ -63,17 +63,17 @@ ui <- fluidPage(
 
 ```{r}
 server <- function(input, output, session) {
-  
   observeEvent(input$switch_teams, {
     new_home <- isolate(input$away_team)
     new_away <- isolate(input$home_team)
     updateSelectInput(session, "home_team", selected = new_home)
     updateSelectInput(session, "away_team", selected = new_away)
   })
-  
+
   observeEvent(input$analyze, {
     match_data <- rugby_data %>%
-      filter((home_team == input$home_team & away_team == input$away_team) | (home_team == input$away_team & away_team == input$home_team))
+      filter((home_team == input$home_team & away_team == input$away_team) | 
+             (home_team == input$away_team & away_team == input$home_team))
 
     if (nrow(match_data) == 0) {
       output$match_stats <- renderDT({
@@ -93,52 +93,36 @@ server <- function(input, output, session) {
         result == "Draw" ~ "Draw"
       ))
 
-    total_matches <- nrow(match_data)
-    home_wins <- sum(match_data$result == "Home Win")
-    away_wins <- sum(match_data$result == "Away Win")
-    draws <- sum(match_data$result == "Draw")
-
     selected_team <- input$home_team
+    opponent_team <- input$away_team
 
-    win_count <- sum(
-      (match_data$home_team == selected_team & match_data$result == "Home Win") |
-      (match_data$away_team == selected_team & match_data$result == "Away Win")
-    )
-
-    loss_count <- sum(
-      (match_data$home_team == selected_team & match_data$result == "Away Win") |
-      (match_data$away_team == selected_team & match_data$result == "Home Win")
-    )
-
-    draw_count <- sum(
-      ((match_data$home_team == selected_team | match_data$away_team == selected_team) & match_data$result == "Draw")
-    )
-
+    win_count <- sum((match_data$home_team == selected_team & match_data$result == "Home Win") |
+                     (match_data$away_team == selected_team & match_data$result == "Away Win"))
+    loss_count <- sum((match_data$home_team == selected_team & match_data$result == "Away Win") |
+                      (match_data$away_team == selected_team & match_data$result == "Home Win"))
+    draw_count <- sum((match_data$home_team == selected_team | match_data$away_team == selected_team) & match_data$result == "Draw")
     total_count <- win_count + loss_count + draw_count
 
     win_prob <- (win_count / total_count) * 100
     loss_prob <- (loss_count / total_count) * 100
     draw_prob <- (draw_count / total_count) * 100
-    
 
     avg_home_score <- mean(match_data$home_score, na.rm = TRUE)
     avg_away_score <- mean(match_data$away_score, na.rm = TRUE)
-
     largest_margin <- max(abs(match_data$home_score - match_data$away_score), na.rm = TRUE)
+
+    font_theme <- theme_minimal(base_size = 16)
 
     output$match_stats <- renderDT({
       datatable(match_data %>%
-        arrange(desc(home_team == input$home_team)) %>%
-        select(home_team, home_score, away_team, away_score, competition, Outcome),
-        options = list(pageLength = 200)
-      )
+                  arrange(desc(home_team == input$home_team)) %>%
+                  select(home_team, home_score, away_team, away_score, competition, Outcome),
+                options = list(pageLength = 200))
     })
 
     output$win_prob <- renderText({
-      paste0("Win Probability for ", input$home_team, ": ", round(win_prob, 2), "%
-",
-             "Loss Probability: ", round(loss_prob, 2), "%
-",
+      paste0("Win Probability for ", selected_team, ": ", round(win_prob, 2), "%\n",
+             "Loss Probability: ", round(loss_prob, 2), "%\n",
              "Draw Probability: ", round(draw_prob, 2), "%")
     })
 
@@ -146,7 +130,7 @@ server <- function(input, output, session) {
       paste0("Average Score - ", input$home_team, ": ", round(avg_home_score, 1), "\n",
              "Average Score - ", input$away_team, ": ", round(avg_away_score, 1), "\n",
              "Largest Margin of Victory: ", largest_margin, " points\n",
-             "Total Matches Played: ", total_matches)
+             "Total Matches Played: ", total_count)
     })
 
     output$home_score_density <- renderPlot({
@@ -159,7 +143,7 @@ server <- function(input, output, session) {
         geom_density(alpha = 0.5) +
         labs(title = paste("Overall Score Density for", input$home_team), x = "Score", y = "Density", fill = "Team Role") +
         scale_fill_manual(values = c("Home" = "blue")) +
-        theme_minimal()
+        font_theme
     })
 
     output$away_score_density <- renderPlot({
@@ -172,7 +156,7 @@ server <- function(input, output, session) {
         geom_density(alpha = 0.5) +
         labs(title = paste("Overall Score Density for", input$away_team), x = "Score", y = "Density", fill = "Team Role") +
         scale_fill_manual(values = c("Away" = "red")) +
-        theme_minimal()
+        font_theme
     })
 
     output$combined_score_distribution <- renderPlot({
@@ -185,7 +169,7 @@ server <- function(input, output, session) {
         geom_density(alpha = 0.4, position = "identity") +
         labs(title = "Combined Score Distribution (When These Teams Meet)", x = "Score", y = "Density", fill = "Team") +
         scale_fill_manual(values = setNames(c("blue", "red"), c(input$home_team, input$away_team))) +
-        theme_minimal() +
+        font_theme +
         scale_x_continuous(breaks = scales::pretty_breaks(n = 10))
     })
 
@@ -195,8 +179,9 @@ server <- function(input, output, session) {
         ggplot(aes(x = point_diff)) +
         geom_histogram(aes(fill = ..x..), binwidth = 3, color = "black", alpha = 0.7) +
         scale_fill_gradient(low = "blue", high = "red") +
-        labs(title = paste("Point Differential Distribution:", input$home_team, "vs", input$away_team), x = paste(input$home_team, "-", input$away_team), y = "Count", fill = "Score") +
-        theme_minimal()
+        labs(title = paste("Point Differential Distribution:", input$home_team, "vs", input$away_team),
+             x = paste(input$home_team, "-", input$away_team), y = "Count", fill = "Score") +
+        font_theme
     })
 
     output$result_pie_chart <- renderPlot({
@@ -213,11 +198,13 @@ server <- function(input, output, session) {
       ggplot(pie_data, aes(x = "", y = n, fill = SelectedOutcome)) +
         geom_col(width = 1, color = "white") +
         coord_polar(theta = "y") +
-        theme_void() +
-        labs(title = paste("Result Breakdown:", input$home_team, "vs", input$away_team), fill = paste("Outcome (from", input$home_team, "perspective)"))
+        theme_void(base_size = 16) +
+        labs(title = paste("Result Breakdown:", input$home_team, "vs", input$away_team),
+             fill = paste("Outcome (from", input$home_team, "perspective)")) +
+        theme(legend.text = element_text(size = 16))
     })
 
- output$score_vs_margin <- renderPlotly({
+    output$score_vs_margin <- renderPlotly({
       plot_data <- match_data %>%
         mutate(point_diff = home_score - away_score,
                total_score = home_score + away_score,
@@ -232,7 +219,7 @@ server <- function(input, output, session) {
           y = paste("Point Differential (", input$home_team, "-", input$away_team, ")"),
           subtitle = paste("Positive =", input$home_team, "winning | Negative =", input$away_team, "winning")
         ) +
-        theme_minimal()
+        font_theme
 
       ggplotly(ggplot_obj, tooltip = "text")
     })
@@ -240,5 +227,6 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
+```
 ```
 
