@@ -16,6 +16,7 @@ library(tidyr)
 library(knitr)
 library(quantreg)
 library(forcats)
+library(stringr)
 
 ```
 
@@ -122,32 +123,60 @@ write_csv(test_male, "tidy_male_lifters_quantreg.csv")
 ```{r}
 #| fig-height: 14
 #| fig-width: 9
-ggplot(test_male, aes(x = Age, y = Best_lift, color = AgeClass)) +
+test_male <- test_male %>%
+  mutate(
+    Lift = str_remove(Lift, pattern = "Best3") %>%
+      str_remove(pattern = "Kg")
+  ) 
+
+Best_m_lift_plot <- ggplot(test_male, aes(x = Age, y = Best_lift)) +
   geom_point(alpha = 0.5, size = 1.2,
             ) +
   
   # Smooth spline quantile regression
-  geom_quantile(
-    quantiles = c(0.1, 0.9),
-    method = "rqss",
-    lambda = 0.1,
-    color = "red",
-    linewidth = 1
-  ) +
+  #geom_quantile(
+   # quantiles = c(0.1, 0.9),
+   # method = "rqss",
+    #lambda = 2.5,
+    #color = "red",
+    #linewidth = 1
+  #) +
   
   # Polynomial quantile regression (2nd degree)
   geom_quantile(
-    quantiles = c(0.1, 0.9),
+    quantiles = c(0.1),
     method = "rq",
-    formula = y ~ poly(x, 2),
+    formula = y ~ poly(x, 4),
     color = "blue",
-    linewidth = 1,
-    linetype = "dashed"
+    linewidth = 1
   ) +
-  facet_wrap(~ Lift, ncol = 1) + theme_minimal() + scale_color_viridis_d(option = "C")
+  geom_quantile(
+    quantiles = (0.9),
+    method = "rq",
+    formula = y ~ poly(x, 4),
+    color = "green",
+    linewidth = 1
+  ) +
+  facet_wrap(~ Lift, ncol = 1) + theme_classic() + coord_cartesian(ylim = c(0,NA)) +
+  labs(
+    x = "Age (years)",
+    y = "Best Lift (kg)",
+    title = "Best Lifts Across Age for Male Lifters"
+  ) +
+   theme(
+    axis.title = element_text(size = 18, face = "bold"),
+    axis.text = element_text(size = 16),
+    strip.text = element_text(size = 18, face = "bold"),
+    plot.title = element_text(size = 22, face = "bold", hjust = 0.5)
+  )
 
+Best_m_lift_plot
+#4th order polynomial to represent the quantiles (.1, .9)
 ```
 
+```{r}
+ggsave("best_m_lift_plot.png", Best_m_lift_plot, width = 9, height = 14)
+```
 
 ```{r}
 # Testing Models: FEMALES
