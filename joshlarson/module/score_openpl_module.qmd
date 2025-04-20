@@ -83,10 +83,6 @@ female %>%
   
 ```
 
-
-
-
-
 ```{r}
 library(quantreg)
 ```
@@ -157,7 +153,9 @@ Best_m_lift_plot <- ggplot(test_male, aes(x = Age, y = Best_lift)) +
     color = "green",
     linewidth = 1
   ) +
-  facet_wrap(~ Lift, ncol = 1) + theme_classic() + coord_cartesian(ylim = c(0,NA)) +
+  facet_wrap(~ Lift, ncol = 1) + theme_classic() + coord_cartesian(ylim = c(0,NA)
+                                                                   ) +
+  geom_vline(xintercept = c(28,35), linetype = "dashed", color = "red") +
   labs(
     x = "Age (years)",
     y = "Best Lift (kg)",
@@ -202,6 +200,7 @@ test_female <- female %>%
 test_female
 write_csv(test_female, "tidy_female_lifters_quantreg.csv")
 ```
+
 ```{r}
 #| fig-height: 14
 #| fig-width: 9
@@ -232,4 +231,3 @@ ggplot(test_female, aes(x = Age, y = Best_lift, color = AgeClass)) +
   scale_color_viridis_d(option = "C") 
 
 ```
-
