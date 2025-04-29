@@ -1,0 +1,38 @@
+---
+title: "Score Sheet Draft"
+format: html
+---
+
+The Powerlifting dataset features data from individual lifters during their most recent competitions. Variables include characteristics such as sex, age, birth year and age classes, and division. Other variables include 3 types of weightlifting: squats, benches, and deadlifts. The relevant variables for this specific module are Sex, Age, and Best3DeadliftKg. Best3DeadliftKg represents the best weight deadlifted out of the 1kg, 2kg, and 3kg lifts.
+
+For the sake of this module, the data set was tidied so that it only included the event "SBD" and two types of equipment use: Raw, meaning no equipment, and Single-ply, meaning .... The data was also tided to exclude any lifter that did not finish the competition or had missing information for key variables like Age and Sex.
+
+The goal of this module is to attempt to use Age and Sex to predict Best3DeadliftKg for a lifter. In order to begin creating a model, there needs to be some exploratory analysis.
+
+1. a) Create a scatterplot comparing Age and Best3Deadlift and add a smoother for the male sex. Code to filter by sex has been provided. By only looking at the curve, which model seems to be the best fit? Why?
+```{r}
+powerlift_n <- read.csv("smshel21/powerlifting/exploration/data/powerlift_data_new.csv")
+
+powerlift_male <-  powerlift_n |>
+  filter(Sex == "M")
+```
+
+
+b) Using y ~ poly(x, 2), add a smoother of a quadratic curve. Does it fit the male smoother? Try changing the 2 to see what fits best.
+
+
+c) Create a model based on what was chosen for the best fit curve. If there were two curves that fit well, create another model using the other curve that fit. What seems to be the better model?
+
+
+2. Create a scatterplot comparing Age and Best3Deadlift and add smoothers for both sexes.
+
+a) Compare the two curves.
+
+b) Using y ~ poly(x, 2), find a curve that best fits the female smoother (since we already did so for the male smoother).
+
+c) Create a model based off of the curve that best fit the female smoother. The indicator variable code is provided. Is it a good model? Why or why not?
+```{r}
+powerlift_n$SexIND = ifelse(powerlift_n$Sex == "M", 1, 0)
+```
+
+3. Create the final model.
