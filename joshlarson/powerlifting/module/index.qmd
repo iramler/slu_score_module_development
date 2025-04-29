@@ -45,32 +45,32 @@ This data set has 97 rows with each rows containing the season statistics for a 
 
 <summary><b>Variable Descriptions</b></summary>
 
-| Variable       | Description                                                                   |
-|--------------------------|----------------------------------------------|
-| player         | player name                                                                   |
-| birdie_avg     | the average number of birdies from an 18 hole round                           |
-| bogey_avg      | the average number of bogeys from an 18 hole round                            |
-| PKD            | the percentage of shots a player has 'parked' (within 10 ft of the basket)    |
-| C1R            | the percent of shots throw within 'Circle 1'(0-33ft) in regulation            |
-| C2R            | the percent of shots throw within 'Circle 2'(33-66ft) in regulation           |
-| FWY            | the percent fairways hit with drives                                          |
-| SCR            | the percent of successful 'scrambles' the player achieves                     |
-| OB/18          | the average total out of bounds shots for 18 holes                            |
-| C1X            | the percent of putts made from C1 excluding tap in putts(0-10ft)              |
-| C2P            | the percent of putts made from C2 (33-66ft)                                   |
-| tot_SG:TG      | the total 'Strokes Gained' on the rest of the field from the tee to the green |
-| tot_SG:P       | the total 'Strokes Gained' on the rest of the field putting                   |
-| events         | total events played for the 2024 DGPT season                                  |
-| rounds         | total rounds played for the 2024 DGPT season                                  |
-| wins           | wins from the 2024 DGPT season                                                |
-| podiums        | total podium placements from the 2024 DGPT season                             |
-| top_10s        | total top 10 placements from the 2024 DGPT season                             |
-| top_20s        | total top 20 placements from the 2024 DGPT season                             |
-| avg_place      | average event placement from the 2024 DGPT season                             |
-| top_10%        | percent of events where the player placed in the top 10                       |
-| top_20%        | percent of events where the player placed in the top 20                       |
-| total_earnings | the players total earnings from the 2024 DGPT season                          |
-| total_strokes  | the total number of shots the player has taken during the DGPT season         |
+| Variable | Description |
+|------------------------------------|------------------------------------|
+| player | player name |
+| birdie_avg | the average number of birdies from an 18 hole round |
+| bogey_avg | the average number of bogeys from an 18 hole round |
+| PKD | the percentage of shots a player has 'parked' (within 10 ft of the basket) |
+| C1R | the percent of shots throw within 'Circle 1'(0-33ft) in regulation |
+| C2R | the percent of shots throw within 'Circle 2'(33-66ft) in regulation |
+| FWY | the percent fairways hit with drives |
+| SCR | the percent of successful 'scrambles' the player achieves |
+| OB/18 | the average total out of bounds shots for 18 holes |
+| C1X | the percent of putts made from C1 excluding tap in putts(0-10ft) |
+| C2P | the percent of putts made from C2 (33-66ft) |
+| tot_SG:TG | the total 'Strokes Gained' on the rest of the field from the tee to the green |
+| tot_SG:P | the total 'Strokes Gained' on the rest of the field putting |
+| events | total events played for the 2024 DGPT season |
+| rounds | total rounds played for the 2024 DGPT season |
+| wins | wins from the 2024 DGPT season |
+| podiums | total podium placements from the 2024 DGPT season |
+| top_10s | total top 10 placements from the 2024 DGPT season |
+| top_20s | total top 20 placements from the 2024 DGPT season |
+| avg_place | average event placement from the 2024 DGPT season |
+| top_10% | percent of events where the player placed in the top 10 |
+| top_20% | percent of events where the player placed in the top 20 |
+| total_earnings | the players total earnings from the 2024 DGPT season |
+| total_strokes | the total number of shots the player has taken during the DGPT season |
 
 ::: {.callout-note collapse="true" title="Important Disc Golf Terms" appearance="minimal"}
 **Parked(PKD):** When a player throws their disc within 10 feet of the basket with a tee shot on par 3s or an approach shot on par 4s and 5s. A score of eagle or better also counts as a shot being parked.

@@ -1,0 +1,11 @@
+---
+title: "Powerlifting_Questions"
+author: "Joshua Larson"
+format: docx
+editor: visual
+---
+
+```{r}
+
+```
+

@@ -1,0 +1,84 @@
+---
+title: "Age_vs_Strength_rq_Module"
+author: "Joshua Larson"
+format: html
+editor: visual
+---
+
+# Age vs. Strength: Quantile‑Regression Module
+
+## [Introduction]{.underline}
+
+Powerlifting is a competitive strength sport where athletes test their limits in three main lifts: the squat, bench press, and deadlift. The goal is to lift as much weight as possible under strict judging standards. Each attempt is judged by a panel of three officials who issue specific commands that must be followed for the lift to count. For example, in the squat, the lifter must unrack the bar, fully lock out their knees, and wait for the "squat" command before descending. After standing back up, they must hold the position and wait for the "rack" command. A lift is successful if at least two of the three judges give a white light.
+
+Athletes are grouped into bodyweight classes and further separated by equipment categories. These range from "raw" divisions, where lifters typically use minimal supportive gear like a belt and wrist wraps, to "equipped" divisions, where single-ply suits and knee wraps provide additional support. There are also drug-tested and non-tested divisions, allowing athletes to compete within appropriate standards based on federation policies and personal choice. Each competitor is given three attempts at each lift, and their heaviest successful lift in each category counts toward their final total. The lifter with the highest combined total in their division is typically declared the winner. Powerlifting demands not just raw strength, but also precision, focus, and adherence to the strict standards set by the sport’s governing bodies.
+
+Learning Goal: Understand why 4th‑order polynomial quantile‑regression is the best to model how Age impacts strength performance in elite vs. non-elite lifters.
+
+By the end, students will be able to:
+
+-   Clean and filter a large real-world data set for analysis
+
+-   Visualize age-based trends in powerlifting performance
+
+-   Use quantile regression to compare elite vs. non-elite lifters
+
+-   Evaluate model fit and discuss limitations in the data
+
+## [Data]{.underline}
+
+The data set for this module was extracted from [OpenPowerlifting Data Service](https://openpowerlifting.gitlab.io/opl-csv/bulk-csv-docs.html){target="_blank"}. It contains over 3.6 million observations with 43 different variables containing the classifications and totals for an individual lifter. This data set is updated almost daily, but we are using the extraction from March 28, 2025. You can check the most recent updated .csv file at [https://gitlab.com/openpowerlifting](https://gitlab.com/openpowerlifting){target="_blank"}
+
+Variable Descriptions
+
+| Variable | Description |
+|-------------------------|----------------------------------------------|
+| Name | lifter name (unique ID if duplicate) |
+| Sex | competition sex category: M, F, or Mx (non-binary) |
+| Event | type of event: SBD (Squat, bench, deadlift), B (Bench-only), D (Deadlift-only), etc. |
+| Equipment | equipment class: Raw, Wraps, Single-ply, Multi-ply, Unlimited, Straps |
+| Age | lifter's age at meet (exact or approximate) |
+| AgeClass | reported age class (e.g., 24-35, 40-44, 80+) |
+| BirthYearClass | birth year group used by IPF affiliates |
+| Division | division label (e.g., Open, Juniors, Masters) |
+| BodyweightKg | actual bodyweight at weigh-in in kg |
+| WeightClassKg | weight class competed in (e.g., 90, 90+) |
+| Squat1Kg | first squat attempt in kg (negative if failed) |
+| Squat2Kg | second squat attempt in kg |
+| Squat3Kg | third squat attempt in kg |
+| Squat4Kg | optional fourth squat attempt (for records) |
+| Bench1Kg | first bench press attempt in kg |
+| Bench2Kg | second bench press attempt in kg |
+| Bench3Kg | third bench press attempt in kg |
+| Bench4Kg | optional fourth bench press attempt |
+| Deadlift1Kg | first deadlift attempt in kg |
+| Deadlift2Kg | second deadlift attempt in kg |
+| Deadlift3Kg | third deadlift attempt in kg |
+| Deadlift4Kg | optional fourth deadlift attempt |
+| Best3SquatKg | best squat from first three attempts |
+| Best3BenchKg | best bench from first three attempts |
+| Best3DeadliftKg | best deadlift from first three attempts |
+| TotalKg | total of best squat, bench, and deadlift |
+| Place | placing in meet: numeric, G (guest), DQ, NS, etc. |
+| Dots | bodyweight-adjusted score (modern Wilks alternative) |
+| Wilks | traditional Wilks score |
+| Glossbrenner | score used by GPC-affiliated feds |
+| Goodlift | IPF GL Points (IPF performance standard) |
+| Tested | Yes if meet/division was drug-tested |
+| Country | lifter's home country |
+| State | lifter's home state, province, or region |
+| Federation | hosting federation (e.g., USAPL, WRPF) |
+| ParentFederation | sanctioning parent body (e.g., IPF) |
+| Date | meet start date (YYYY-MM-DD) |
+| MeetCountry | country where the meet occurred |
+| MeetState | state or region where the meet occurred |
+| MeetName | name of the meet (no year/fed info) |
+| Sanctioned | "YES" if the meet was officially recognized |
+
+**Note:** Any negative values inputted into the lifts represents a failure and/or a disqualification. We will take care of this when we tidy the data set.
+
+
+
+::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
+Students should find that there is a stronger correlation between driving and performance statistics than putting and performance statistics.
+:::
