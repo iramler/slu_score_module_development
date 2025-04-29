@@ -32,9 +32,9 @@ a) Create a scatterplot comparing Age and Best3DeadliftKg. Add a smoother to inc
 # add squat and bench?
 library(tidyverse)
 library(readr)
-powerlift <- read.csv("smshel21/powerlifting/module/data/powerlift_sample_data_updated.csv")
+powerlift <- read.csv("smshel21/powerlifting/module/data_1/powerlift_sample_data_updated.csv")
 
-powerlift_n <- read.csv("smshel21/powerlifting/exploration/data/powerlift_data_new.csv")
+powerlift_n <- read.csv("smshel21/powerlifting/exploration/data_1/powerlift_data_new.csv")
 
 powerlift_new <- powerlift |>
   filter(Event == "SBD") |>
@@ -70,8 +70,8 @@ powerlift_f <- powerlift_new |>
 
 ggplot(data = powerlift_f, aes(x = Age, y = Best3DeadliftKg)) +
   geom_point() +
-  geom_smooth(color = "blue", se = FALSE) +
-  geom_smooth(color = "red", method = "lm", formula = y ~ poly(x, 5), se = FALSE)
+  geom_smooth(color = "blue", se = FALSE) #+
+  #geom_smooth(color = "red", method = "lm", formula = y ~ poly(x, 5), se = FALSE)
 ```
 
 
@@ -80,7 +80,7 @@ ggplot(data = powerlift_f, aes(x = Age, y = Best3DeadliftKg)) +
 
 b) By just looking at the graph, what type of model should be used?
 
-
+Students should suggest quadratic.
 
 
 

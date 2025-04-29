@@ -42,7 +42,7 @@ Learning Objectives:
 
 ::: {.callout-note collapse="true" title="Methods" appearance="minimal"}
 
-Students are expected to have been exposed to one-sample inference for means (most likely t-intervals). Students will also need to have been exposed to general sampling practices - including common biases or problematics sampling schemes such as convenience samples and self-reported data.
+Students are expected to have been exposed to introductory models and p-values. There's also an expectation that they are able to make basic graphs in R using ggplot.
 :::
 
 
@@ -80,5 +80,5 @@ Download data: [dumbbell_barbell_weight_ratio.csv](https://data.scorenetwork.org
 [Class handout - with solutions]
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
-Students should be able to determine the best fit models using exploratory plots and p-values.
+Students should be able to determine the best fit models using exploratory plots and p-values. They should gain an understanding of higher-order models when dealing with indicator variables.
 :::
