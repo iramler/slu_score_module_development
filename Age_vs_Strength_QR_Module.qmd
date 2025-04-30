@@ -32,7 +32,7 @@ The data set for this module was extracted from [OpenPowerlifting Data Service](
 Variable Descriptions
 
 | Variable | Description |
-|-------------------------|----------------------------------------------|
+|----|----|
 | Name | lifter name (unique ID if duplicate) |
 | Sex | competition sex category: M, F, or Mx (non-binary) |
 | Event | type of event: SBD (Squat, bench, deadlift), B (Bench-only), D (Deadlift-only), etc. |
@@ -77,7 +77,7 @@ Variable Descriptions
 
 **Note:** Any negative values inputted into the lifts represents a failure and/or a disqualification. We will take care of this when we tidy the data set.
 
-
+The activity sheet is here: [Powerlifting_Questions.qmd](Powerlifting_Questions.qmd)
 
 ::: {.callout-note collapse="true" title="Conclusion" appearance="minimal"}
 Students should find that there is a stronger correlation between driving and performance statistics than putting and performance statistics.

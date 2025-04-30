@@ -5,10 +5,6 @@ editor: visual
 ---
 
 ```{r}
-install.packages("quantreg")
-```
-
-```{r}
 library(readr)
 library(ggplot2)
 library(dplyr)
@@ -221,7 +217,7 @@ ggplot(test_female, aes(x = Age, y = Best_lift, color = AgeClass)) +
   geom_quantile(
     quantiles = c(0.1, 0.9),
     method = "rq",
-    formula = y ~ poly(x, 2),
+    formula = y ~ poly(x, 4),
     color = "blue",
     linewidth = 1,
     linetype = "dashed"
