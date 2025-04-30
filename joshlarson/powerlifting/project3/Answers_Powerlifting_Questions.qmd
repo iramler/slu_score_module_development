@@ -1,0 +1,290 @@
+---
+title: "Answers_Powerlifting_Questions"
+author: "Joshua Larson"
+format: docx
+editor: visual
+---
+
+# Questions
+
+In this module, we will combine various concepts regarding knowledge in foundational data science, as well as statistical regression techniques.
+
+Here are the needed libraries for the problem set.
+
+```{r}
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(knitr)
+library(forcats)
+library(stringr)
+```
+
+To start, we need to load the data set.
+
+```{r}
+openpowerlifting <- read_csv(here::here("joshlarson/data/openpowerlifting-2025-03-22/openpowerlifting-2025-03-22-c4367451.csv"))
+```
+
+This will most likely make your computer look like a 20th century wirebox.
+
+### I. Tidying
+
+1.  Now we need to tidy this data to set ourselves up to look at Age vs. Strength. We will worry about class later.
+
+    a.  For each lifter, keep only tested divisions, only "SBD" events, and single-ply or raw equipment. Then remove lifters who had a DQ, did not show up, were guest lifters, or were disqualified for doping (DD). Name this new data set `tidy`. Also, keep only the most recent event per lifter using:
+
+    ```{r}
+    tidy <- openpowerlifting %>%
+      group_by(Name) %>%
+      arrange(desc(Date), .by_group = TRUE) %>%
+      slice(1) %>%
+      filter(
+        Tested == "Yes",
+        Event == "SBD",
+        Equipment %in% c("Single-ply", "Raw"),
+        !(Place %in% c("DQ", "NS", "G", "DD"))
+      )
+    ```
+
+    b.  Now keep only people who submitted their `Age`, and have `Best3SquatKg`, `Best3BenchKg`, and `Best3DeadliftKg`. Also, filter for male lifters. Name this new data set `male`.
+
+    ```{r}
+    male <- tidy %>%
+      drop_na(Age, Best3SquatKg, Best3BenchKg, Best3DeadliftKg) %>%
+      filter(Sex == "M")
+    ```
+
+    c.  To create our random sample, we need to select a number from each `AgeClass`. Because of the size of the dataset, 500 per age class provides balance while still giving enough data for modeling. Why is 500 more sufficient than 20 or 100?
+
+    500 ensures each age group is well represented and reduces bias from unbalanced classes. A small sample like 20 or 100 may not capture variation or support valid modeling.
+
+    d.  I have supplied the code for generating the random sample. The age classes were not leveled correctly when we got to the plot. Arrange the `AgeClass` variable accordingly using the `forcats` package. Name this cleaned data `test_male`.
+
+    ```{r}
+    set.seed(1)
+    test_male <- male %>%
+      group_by(AgeClass) %>%
+      group_modify(~ if (nrow(.x) >= 500) sample_n(.x, 500) else .x) %>%
+      ungroup() %>%
+      select(1:10, 15, 20, 25:35) %>%
+      pivot_longer(
+        cols = 11:13,
+        names_to = "Lift",
+        values_to = "Best_lift"
+      ) %>%
+      mutate(
+        AgeClass = fct_relevel(factor(AgeClass),
+                               c("5-12", "13-15", "16-17", "18-19",
+                                 "20-23", "24-34", "35-39", "40-44", "45-49", "50-54",
+                                 "55-59", "60-64", "65-69", "70-74", "75-79", "80-999"))
+      )
+    ```
+
+    e.  Modify the lift names so they register as "Squat", "Bench", and "Deadlift" using a `str_` function. Save the final result as a CSV file named `tidy_male_lifters_quantreg.csv`.
+
+    ```{r}
+    test_male <- test_male %>%
+      mutate(
+        Lift = str_remove(Lift, "Best3") %>%
+               str_remove("Kg")
+      )
+
+    write_csv(test_male, "tidy_male_lifters_quantreg.csv")
+    ```
+
+### II. Modeling and Plotting
+
+In this section, we will explore different plots, identity which models are useful for our investigation, and then apply those models to the plots.
+
+To start, lets plot the points we have:
+
+```{r}
+#| fig-height: 14
+#| fig-width: 9
+tidy_male %>%
+  ggplot(aes(x = Age, y = Best_lift)) +
+  geom_point(alpha = 0.5, size = 1.2,
+            ) + 
+  facet_wrap(~ Lift, ncol = 1) + 
+  theme_classic() + 
+  coord_cartesian(ylim = c(0,NA))
+```
+
+2.  If we wanted to add a trend line, we would normally input a `geom_smooth()`. a. What type of smoothing method does `geom_smooth()` default to? Try it out.
+
+```{r}
+tidy_male %>%
+ggplot(., 
+       aes(x = Age, 
+           y = Best_lift)
+       ) +
+  geom_point(alpha = 0.4) +
+  geom_smooth()  # Default 
+```
+
+The default method is LOESS (locally weighted smoothing)
+
+b.  Why is it poor for interpreting performance across age?
+
+LOESS smooths locally but doesn't reflect the long-term structure of strength development. It often over-smooths the peak or flattening areas and may not generalize well outside the observed data. It also models the mean, not distributional changes across quantiles.
+
+What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a double exponential relationship.
+
+3.  How does `Age` vs. `Strength` represent a double exponential relationship?
+
+Strength increases rapidly in younger lifters, plateaus in the late 20s to early 30s, and then declines gradually before falling faster in older age. This produces a curve with initial exponential growth and later exponential decay which is a shape that higher-degree polynomials like the 4th-order can approximate.
+
+Expanding on what quantile regression is, the model is of the form:
+
+$$Q_Y(\tau \mid X) = \sum_{i=0}^{k} \beta_i(\tau) X^i$$ Where:
+
+-   QY(τ \| X): Estimated τ-th quantile of performance given age X
+
+-   τ: Quantile level (e.g., 0.1 for non-elite, 0.9 for elite)
+
+-   X: Predictor variable (Age)
+
+-   βᵢ: Coefficients specific to each quantile
+
+Quantile regression is used to model the relationship between a predictor,such as `Age`, and different points (quantiles) of the response variable, like `Strength`. Unlike linear regression, which estimates the mean, quantile regression allows us to explore how performance varies across the entire distribution. Different orders will fit the model better, so lets test various orders to see what fits best. To investigate elite vs. non-elite, we will use the 90th and 10th percentiles, or quantiles.
+
+Here we will introduce the `rq()` function from the `quantreg` package and run through some fundamental tips to understand the model. Quantile regression is done using `geom_quantile()` which allows us to model the conditional quantiles of a response variable, not just the mean. This code chunk plots a linear quantile regression line through the median. Determine which factor needs to be changed to get the geom to look at the median
+
+```{r}
+library(quantreg)
+ggplot(test_male, aes(x = Age, y = TotalKg)) +
+  geom_point(alpha = 0.4) +
+  geom_quantile(quantiles = 0.5, method = "rq", formula = y ~ x, color = "red", linewidth = 1.2) +
+  labs(
+    title = "Basic Quantile Regression",
+    x = "Age",
+    y = "Total Weight Lifted (kg)"
+  ) +
+  theme_minimal()
+```
+
+4.  Here are some questions to get the fundamentals down.
+
+    a.  What is the difference between using `geom_quantile()` vs `geom_smooth()`
+
+`geom_quantile()` fits quantile regression lines, estimating conditional percentiles while `geom_smooth()` models the conditional mean. Quantile regression reveals variation across performance levels rather than averaging everyone together.
+
+```         
+b.  What kind of trend is this line at the moment? Why might this specific trend not be a good representation of `Age` vs. `Strength`?
+```
+
+This is a linear trend line for the median (50th percentile). It fails to capture the curved nature of strength development, specifically at the peak and decline phases.
+
+5.  Below is a code chunk using `geom_quantile()` to create quantile regression plots with a polynomial trend line. In the `formula` argument, replace the "y" inside `poly(x, y)` with a number from 1 to 6 (e.g., `poly(x, 2)` for a 2nd-order polynomial). Based on the plots generated for each order, which polynomial degree provides the best fit for the data, and why? Explain your reasoning using what you observe in the shape and accuracy of the curves.
+
+```{r}
+#| fig-height: 14
+#| fig-width: 9
+tidy_male %>%
+  ggplot(., aes(x = Age, y = Best_lift)) +
+  geom_point(alpha = 0.5, size = 1.2,
+            ) +
+  geom_quantile(
+    quantiles = c(0.1),
+    method = "rq",
+    formula = y ~ poly(x, y),
+    color = "blue",
+    linewidth = 1
+  ) +
+  geom_quantile(
+    quantiles = (0.9),
+    method = "rq",
+    formula = y ~ poly(x, y),
+    color = "green",
+    linewidth = 1
+  ) + 
+  facet_wrap(~ Lift, ncol = 1) + 
+  theme_classic() + 
+  coord_cartesian(ylim = c(0,NA))
+```
+
+A 4th-degree polynomial fits best. It balances flexibility and interpretability, capturing the rise, plateau, and fall of performance without overfitting. Lower degrees miss the curvature, while higher ones may produce unrealistic wiggles
+
+6.  Why is looking at trends for different quantiles better than least squares regression which estimates the conditional mean?
+
+Quantile regression is useful because it captures how different parts of the performance distribution respond to age, rather than just modeling the average. Relying on the mean can hide important variation, especially when the data is skewed or has unequal spread across age groups. Mean-based models assume uniform trends across all lifters, which can lead to misleading conclusions when performance varies widely between non-elite and elite athletes. Quantile regression accounts for this variability and gives a more complete picture of performance changes.
+
+Hopefully, now that you have made it here (we are almost done, don't worry), we can now explain the appropriate model for `Age` vs. `Strength`. To model these patterns more accurately, we fit a 4th-degree polynomial to each quantile. This model captures the non-linear relationship between age and total weight lifted, reflecting the rise, peak, and decline of performance over time. The model is: $$
+Q_Y(\tau \mid \text{Age}) = \beta_0(\tau) + \beta_1(\tau)\,\text{Age} + \beta_2(\tau)\,\text{Age}^2 + \beta_3(\tau)\,\text{Age}^3 + \beta_4(\tau)\,\text{Age}^4$$
+
+7.  Find the peak age for elite (τ = 0.9) lifters?
+
+Step 1: Take the Derivative: To find the peak (maximum or minimum) of the performance curve, we take the first derivative with respect to age:
+
+$$
+\frac{dQ_Y}{d\text{Age}} = \beta_1 + 2\beta_2 \cdot \text{Age} + 3\beta_3 \cdot \text{Age}^2 + 4\beta_4 \cdot \text{Age}^3
+$$
+
+Step 2: Use Estimated Coefficients\
+For the 90th quantile (elite lifters): Let the estimated coefficients be:
+
+$$
+\beta_1 = 3.944,\quad \beta_2 = -0.455,\quad \beta_3 = 0.0126,\quad \beta_4 = -0.000113
+$$
+
+Plug these into the derivative:
+
+$$
+\frac{dQ_Y}{d\text{Age}} = 3.944 - 0.91 \cdot \text{Age} + 0.0378 \cdot \text{Age}^2 - 0.000452 \cdot \text{Age}^3
+$$
+
+Solve:
+
+$$
+-0.000452 \cdot \text{Age}^3 + 0.0378 \cdot \text{Age}^2 - 0.91 \cdot \text{Age} + 3.944 = 0
+$$
+
+Roots:\
+- Age ≈ 28.16 (Elite maximum)
+
+-Age ≈ 28.4 (Non-Elite)
+
+8.  Using the plot I supplied, construct the critical points on the graph using a vertical, dashed, red line.
+
+```{r}
+Best_m_lift_plot <- ggplot(test_male, aes(x = Age, y = Best_lift)) +
+  geom_point(alpha = 0.5, size = 1.2,
+            ) +
+  geom_quantile(
+    quantiles = c(0.1),
+    method = "rq",
+    formula = y ~ poly(x, 4),
+    color = "blue",
+    linewidth = 1
+  ) +
+  geom_quantile(
+    quantiles = (0.9),
+    method = "rq",
+    formula = y ~ poly(x, 4),
+    color = "green",
+    linewidth = 1
+  ) +
+  facet_wrap(~ Lift, ncol = 1) + theme_classic() + coord_cartesian(ylim = c(0,NA)
+                                                                   ) +
+  geom_vline(xintercept = c(28.16,28.4), linetype = "dashed", color = "red") +
+  labs(
+    x = "Age (years)",
+    y = "Best Lift (kg)",
+    title = "Best Lifts Across Age for Male Lifters"
+  ) +
+   theme(
+    axis.title = element_text(size = 18, face = "bold"),
+    axis.text = element_text(size = 16),
+    strip.text = element_text(size = 18, face = "bold"),
+    plot.title = element_text(size = 22, face = "bold", hjust = 0.5)
+  )
+
+```
+
+### III. Findings and Limitations
+
+Through my study, I concluded that elite lifters develop strength at a faster rate than non-elites, reaching higher totals earlier in their careers. While both groups generally peak between ages 24 and 35 (28.2 for Elite), the main difference lies in the developmental phase, where elite lifters show steeper early progress. After the peak, both groups decline at a similar rate, but elite lifters also have a slightly steeper fall of towards the 75-80 age range. These patterns suggest that early performance growth may be a key predictor of long-term success.
+
+However, the current model has limitations. It does not track lifters over time, so we cannot see how individuals improve or decline. Each data point reflects a single competition result from a different athlete. Future work should focus on modeling lifters longitudinally and investigating what specific factors, such as training history, consistency, or recovery, could potentially be the best to predict who becomes elite.

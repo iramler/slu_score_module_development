@@ -96,7 +96,7 @@ tidy_male %>%
 
 What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a double exponential relationship.
 
-5.  How does `Age` vs. `Strength` represent a double exponential relationship?
+3.  How does `Age` vs. `Strength` represent a double exponential relationship?
 
 Expanding on what quantile regression is, the model is of the form:
 
@@ -127,10 +127,10 @@ ggplot(test_male, aes(x = Age, y = TotalKg)) +
   theme_minimal()
 ```
 
-6.  Here are some questions to get the fundamentals down.
+4.  Here are some questions to get the fundamentals down.
     a.  What is the difference between using `geom_quantile()` vs `geom_smooth()`
     b.  What kind of trend is this line at the moment? Why might this specific trend not be a good representation of `Age` vs. `Strength`?
-7.  Below is a code chunk using `geom_quantile()` to create quantile regression plots with a polynomial trend line. In the `formula` argument, replace the "y" inside `poly(x, y)` with a number from 1 to 6 (e.g., `poly(x, 2)` for a 2nd-order polynomial). Based on the plots generated for each order, which polynomial degree provides the best fit for the data, and why? Explain your reasoning using what you observe in the shape and accuracy of the curves.
+5.  Below is a code chunk using `geom_quantile()` to create quantile regression plots with a polynomial trend line. In the `formula` argument, replace the "y" inside `poly(x, y)` with a number from 1 to 6 (e.g., `poly(x, 2)` for a 2nd-order polynomial). Based on the plots generated for each order, which polynomial degree provides the best fit for the data, and why? Explain your reasoning using what you observe in the shape and accuracy of the curves.
 
 ```{r}
 #| fig-height: 14
@@ -158,14 +158,14 @@ tidy_male %>%
   coord_cartesian(ylim = c(0,NA))
 ```
 
-8.  Why is looking at trends for different quantiles better than least squares regression which estimates the conditional mean?
+6.  Why is looking at trends for different quantiles better than least squares regression which estimates the conditional mean?
 
 Hopefully, now that you have made it here (we are almost done, don't worry), we can now explain the appropriate model for `Age` vs. `Strength`. To model these patterns more accurately, we fit a 4th-degree polynomial to each quantile. This model captures the non-linear relationship between age and total weight lifted, reflecting the rise, peak, and decline of performance over time. The model is: $$
 Q_Y(\tau \mid \text{Age}) = \beta_0(\tau) + \beta_1(\tau)\,\text{Age} + \beta_2(\tau)\,\text{Age}^2 + \beta_3(\tau)\,\text{Age}^3 + \beta_4(\tau)\,\text{Age}^4$$
 
-9.  Find the peak age for elite (τ = 0.9) lifters? Non-elite (τ = 0.1)?
+7.  Find the peak age for elite (τ = 0.9) lifters? Non-elite (τ = 0.1)?
 
-10. Using the plot I supplied, construct the critical points on the graph using a vertical, dashed, red line.
+8. Using the plot I supplied, construct the critical points on the graph using a vertical, dashed, red line.
 
 
 ### III. Findings and Limitations
