@@ -1,10 +1,21 @@
 ---
-title: "Age_vs_Strength_rq_Module"
-author: "Joshua Larson"
+title: "Age vs. Strength by Class"
+author: 
+  - name: Joshua Larson
+    affiliation: 
+      - id: slu
+        name: St. Lawrence University
+  - name: Ivan Ramler
+    email: iramler@stlawu.edu
+    affiliation: 
+      - ref: slu
+date: May 4, 2024
+description: "How age impacts strength performance in elite vs. non-elite lifters."
+categories:
+  - Correlation
 format: html
 editor: visual
 ---
-
 # Age vs. Strength: Quantile‑Regression Module
 
 ## [Introduction]{.underline}
@@ -32,7 +43,7 @@ The data set for this module was extracted from [OpenPowerlifting Data Service](
 Variable Descriptions
 
 | Variable | Description |
-|---------------------------|---------------------------------------------|
+|------------------------------------|------------------------------------|
 | Name | lifter name (unique ID if duplicate) |
 | Sex | competition sex category: M, F, or Mx (non-binary) |
 | Event | type of event: SBD (Squat, bench, deadlift), B (Bench-only), D (Deadlift-only), etc. |
@@ -80,5 +91,3 @@ Variable Descriptions
 The activity sheet is here: [Powerlifting_Questions.qmd](Powerlifting_Questions.qmd)
 
 Answers are here: [Answers_Powerlifting_Questions.qmd](Answers_Powerlifting_Questions.qmd)
-
-

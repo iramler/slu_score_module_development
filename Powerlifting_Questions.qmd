@@ -1,8 +1,12 @@
 ---
-title: "Powerlifting_Questions"
+title: "Powerlifting Questions"
 author: "Joshua Larson"
-format: docx
+format: html
 editor: visual
+execute:
+  error: true
+  message: false
+ 
 ---
 
 # Questions
@@ -21,13 +25,19 @@ library(forcats)
 library(stringr)
 ```
 
-To start, we need to load the data set.
+To start, we need to load the data set. Instructions for downloading OpenPowerlifting data are as followed:
+1.  Visit https://openpowerlifting.gitlab.io/opl-csv/bulk-csv-docs.html
+2.  Click the download link for "openpowerlifting-latest.zip"
+3.  Save the zip file to your computer
+4.  Extract the zip file to get the CSV file by double-clicking the download
+5.  Name this object openpowerlifting
+
 
 ```{r}
-openpowerlifting <- read_csv(here::here("joshlarson/data/openpowerlifting-2025-03-22/openpowerlifting-2025-03-22-c4367451.csv"))
+<- read_csv(here::here(""))
 ```
 
-This will most likely make your computer look like a 20th century wirebox.
+This will most likely make your computer look like a [20th century wirebox](https://wanderingstan.com/2020-02-04/the-evolution-of-developer-experience-in-the-20th-century).
 
 ### I. Tidying
 
@@ -63,7 +73,7 @@ This will most likely make your computer look like a 20th century wirebox.
     names_to = "Lift",
     values_to = "Best_lift"
       ) %>%
-      # Arrange the `AgeClass` variable accordingly using the `forecats` package. 
+       # Arrange the `AgeClass` variable accordingly using the `forecats` package. 
     ```
 
     e.  Lastly, modify the lift names so they register as "Squat", "Bench", and "Deadlift" using a `str_` function. Test your `readr` knowledge and save this as a csv file named "tidy_male_lifters_quantreg.csv"
@@ -74,7 +84,15 @@ This will most likely make your computer look like a 20th century wirebox.
 
 ### II. Modeling and Plotting
 
-In this section, we will explore different plots, identity which models are useful for our investigation, and then apply those models to the plots.
+In this section, we aim to model how age affects strength performance across different performance levels in powerlifting.
+
+We define:
+
+-   Elite lifters: those performing at the 90th percentile
+
+-   Non-elite lifters: those performing at the 10th percentile
+
+We will explore different plots, identify which models are useful for our investigation, and apply those models to examine not just the average outcome but also different points in the outcome distribution, such as the 10th or 90th percentile. This approach helps reveal patterns among elite and non-elite performers that would be hidden by averages.
 
 To start, lets plot the points we have:
 
@@ -94,7 +112,15 @@ tidy_male %>%
     a.  What type of smoothing method does `geom_smooth()` default to? Try it out.
     b.  Why is it poor for interpreting performance across age?
 
-What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a double exponential relationship.
+What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a [double exponential relationship](https://www.wolframalpha.com/input?i=plot+300*exp%28-0.02*%28x-8%29%29*%281-exp%28-0.05*%28x-8%29%29%29+for+x%3D0+to+90). The age vs. strength relationship shows rapid improvement early on followed by a slower decline later in life.
+
+Here is an example formula:
+
+$$
+f(x) = A \cdot e^{-k_1(x - x_0)} \cdot (1 - e^{-k_2(x - x_0)})
+$$
+
+We can then use the regression line with different lifting percentiles using quantile regression.
 
 3.  How does `Age` vs. `Strength` represent a double exponential relationship?
 
@@ -110,7 +136,7 @@ $$Q_Y(\tau \mid X) = \sum_{i=0}^{k} \beta_i(\tau) X^i$$ Where:
 
 -   βᵢ: Coefficients specific to each quantile
 
-Quantile regression is used to model the relationship between a predictor,such as `Age`, and different points (quantiles) of the response variable, like `Strength`. Unlike linear regression, which estimates the mean, quantile regression allows us to explore how performance varies across the entire distribution. Different orders will fit the model better, so lets test various orders to see what fits best. To investigate elite vs. non-elite, we will use the 90th and 10th percentiles, or quantiles.
+Quantile regression is used to model the relationship between a predictor, such as `Age`, and different points (quantiles) of the response variable, like `Strength`. Unlike linear regression, which estimates the mean, quantile regression allows us to explore how performance varies across the entire distribution. Different orders will fit the model better, so lets test various orders to see what fits best. To investigate elite vs. non-elite, we will use the 90th and 10th percentiles, or quantiles.
 
 Here we will introduce the `rq()` function from the `quantreg` package and run through some fundamental tips to understand the model. Quantile regression is done using `geom_quantile()` which allows us to model the conditional quantiles of a response variable, not just the mean. This code chunk plots a linear quantile regression line through the median. Determine which factor needs to be changed to get the geom to look at the median
 
@@ -165,10 +191,10 @@ Q_Y(\tau \mid \text{Age}) = \beta_0(\tau) + \beta_1(\tau)\,\text{Age} + \beta_2(
 
 7.  Find the peak age for elite (τ = 0.9) lifters? Non-elite (τ = 0.1)?
 
-8. Using the plot I supplied, construct the critical points on the graph using a vertical, dashed, red line.
-
+8.  Using the plot I supplied, construct the critical points on the graph using a vertical, dashed, red line.
 
 ### III. Findings and Limitations
+
 Through my study, I concluded that elite lifters develop strength at a faster rate than non-elites, reaching higher totals earlier in their careers. While both groups generally peak between ages 24 and 35, the main difference lies in the developmental phase, where elite lifters show steeper early progress. After the peak, both groups decline at a similar rate, but elite lifters also have a slightly steeper fall of towards the 75-80 age range. These patterns suggest that early performance growth may be a key predictor of long-term success.
 
 However, the current model has limitations. It does not track lifters over time, so we cannot see how individuals improve or decline. Each data point reflects a single competition result from a different athlete. Future work should focus on modeling lifters longitudinally and investigating what specific factors, such as training history, consistency, or recovery, could potentially be the best to predict who becomes elite.

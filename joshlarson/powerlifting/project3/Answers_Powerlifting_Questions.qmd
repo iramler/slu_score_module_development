@@ -1,13 +1,16 @@
 ---
 title: "Answers_Powerlifting_Questions"
 author: "Joshua Larson"
-format: docx
+format: html
 editor: visual
+execute:
+  error: true
+  message: false
 ---
 
 # Questions
 
-In this module, we will combine various concepts regarding knowledge in foundational data science, as well as statistical regression techniques.
+In this module, we will bring together concepts from the foundations of data science along with various statistical regression techniques.
 
 Here are the needed libraries for the problem set.
 
@@ -21,13 +24,20 @@ library(forcats)
 library(stringr)
 ```
 
-To start, we need to load the data set.
+To start, we need to load the data set. Instructions for downloading OpenPowerlifting data are as followed:
+1.  Visit https://openpowerlifting.gitlab.io/opl-csv/bulk-csv-docs.html
+2.  Click the download link for "openpowerlifting-latest.zip"
+3.  Save the zip file to your computer
+4.  Extract the zip file to get the CSV file by double-clicking the download
+5.  Name this object openpowerlifting
 
 ```{r}
-openpowerlifting <- read_csv(here::here("joshlarson/data/openpowerlifting-2025-03-22/openpowerlifting-2025-03-22-c4367451.csv"))
+# openpowerlifting <- read_csv(here::here("joshlarson/data/openpowerlifting-2025-03-22/openpowerlifting-2025-03-22-c4367451.csv"))
+
+# This will vary by user
 ```
 
-This will most likely make your computer look like a 20th century wirebox.
+This will most likely make your computer look like a [20th century wirebox](https://wanderingstan.com/2020-02-04/the-evolution-of-developer-experience-in-the-20th-century).
 
 ### I. Tidying
 
@@ -36,16 +46,16 @@ This will most likely make your computer look like a 20th century wirebox.
     a.  For each lifter, keep only tested divisions, only "SBD" events, and single-ply or raw equipment. Then remove lifters who had a DQ, did not show up, were guest lifters, or were disqualified for doping (DD). Name this new data set `tidy`. Also, keep only the most recent event per lifter using:
 
     ```{r}
-    tidy <- openpowerlifting %>%
-      group_by(Name) %>%
-      arrange(desc(Date), .by_group = TRUE) %>%
-      slice(1) %>%
-      filter(
-        Tested == "Yes",
-        Event == "SBD",
-        Equipment %in% c("Single-ply", "Raw"),
-        !(Place %in% c("DQ", "NS", "G", "DD"))
-      )
+#    tidy <- openpowerlifting %>%
+#      group_by(Name) %>%
+#      arrange(desc(Date), .by_group = TRUE) %>%
+#      slice(1) %>%
+#      filter(
+#        Tested == "Yes",
+#        Event == "SBD",
+#        Equipment %in% c("Single-ply", "Raw"),
+#        !(Place %in% c("DQ", "NS", "G", "DD"))
+#      )
     ```
 
     b.  Now keep only people who submitted their `Age`, and have `Best3SquatKg`, `Best3BenchKg`, and `Best3DeadliftKg`. Also, filter for male lifters. Name this new data set `male`.
@@ -96,7 +106,15 @@ This will most likely make your computer look like a 20th century wirebox.
 
 ### II. Modeling and Plotting
 
-In this section, we will explore different plots, identity which models are useful for our investigation, and then apply those models to the plots.
+In this section, we aim to model how age affects strength performance across different performance levels in powerlifting.
+
+We define:
+
+-   Elite lifters: those performing at the 90th percentile
+
+-   Non-elite lifters: those performing at the 10th percentile
+
+We will explore different plots, identify which models are useful for our investigation, and apply those models to examine not just the average outcome but also different points in the outcome distribution, such as the 10th or 90th percentile. This approach helps reveal patterns among elite and non-elite performers that would be hidden by averages.
 
 To start, lets plot the points we have:
 
@@ -112,25 +130,35 @@ tidy_male %>%
   coord_cartesian(ylim = c(0,NA))
 ```
 
-2.  If we wanted to add a trend line, we would normally input a `geom_smooth()`. a. What type of smoothing method does `geom_smooth()` default to? Try it out.
+2.  If we wanted to add a trend line, we would normally input a `geom_smooth()`.
 
-```{r}
-tidy_male %>%
-ggplot(., 
-       aes(x = Age, 
-           y = Best_lift)
-       ) +
-  geom_point(alpha = 0.4) +
-  geom_smooth()  # Default 
-```
+    a.  What type of smoothing method does `geom_smooth()` default to? Try it out.
+
+    ```{r}
+    tidy_male %>%
+    ggplot(., 
+           aes(x = Age, 
+               y = Best_lift)
+           ) +
+      geom_point(alpha = 0.4) +
+      geom_smooth()  # Default 
+    ```
 
 The default method is LOESS (locally weighted smoothing)
 
-b.  Why is it poor for interpreting performance across age?
+b.  Why is it poor for interpreting performance across age? 
 
 LOESS smooths locally but doesn't reflect the long-term structure of strength development. It often over-smooths the peak or flattening areas and may not generalize well outside the observed data. It also models the mean, not distributional changes across quantiles.
 
-What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a double exponential relationship.
+What alternative approach could we use to better capture trends in strength as we age? Here, we fit what is known as a polynomial regression model. Why? Because it represents a [double exponential relationship](https://www.wolframalpha.com/input?i=plot+300*exp%28-0.02*%28x-8%29%29*%281-exp%28-0.05*%28x-8%29%29%29+for+x%3D0+to+90). The age vs. strength relationship shows rapid improvement early on followed by a slower decline later in life.
+
+Here is an example formula:
+
+$$
+f(x) = A \cdot e^{-k_1(x - x_0)} \cdot (1 - e^{-k_2(x - x_0)})
+$$
+
+We can then use the regression line with different lifting percentiles using quantile regression.
 
 3.  How does `Age` vs. `Strength` represent a double exponential relationship?
 
