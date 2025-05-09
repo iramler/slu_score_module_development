@@ -1,0 +1,319 @@
+---
+title: "TennisExploratory"
+format: html
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(stringr)
+library(lubridate)
+
+# Load the matches dataset
+matches <- read_csv("../Data/atp_matches_till_2022.csv")
+
+# Filter for matches from 2010 to 2022 and remove rows with missing ranks
+cleaned <- matches |>
+  mutate(tourney_date = ymd(tourney_date)) |>
+  filter(year(tourney_date) >= 2010 & year(tourney_date) <= 2022) |>
+  filter(!is.na(winner_rank) & !is.na(loser_rank)) |>
+  mutate(
+    winner_rank = as.integer(winner_rank),
+    loser_rank = as.integer(loser_rank),
+    
+    # Create outcome variable: 1 if lower-ranked player won
+    lower_rank_won = if_else(winner_rank > loser_rank, 1, 0),
+    
+    # Include who was the lower-ranked player (optional)
+    lower_rank_player = if_else(winner_rank > loser_rank, winner_name, loser_name),
+    
+    surface = factor(surface),
+    match_year = year(tourney_date)
+  ) |>
+  select(
+    tourney_date, match_year, surface,
+    winner_name, loser_name,
+    winner_rank, loser_rank,
+    lower_rank_player, lower_rank_won
+  )
+
+# Preview
+glimpse(cleaned)
+
+# Save for modeling
+write_csv(cleaned, "tennis_cleaned.csv")
+
+```
+
+```{r}
+library(ggplot2)
+
+
+# Read in the cleaned match data
+matches <- read_csv("tennis_cleaned.csv")
+
+# STEP 1: Create new outcome variable: 1 = lower-ranked player wins, 0 = higher-ranked wins
+matches <- matches |> 
+  mutate(
+    lower_rank = pmin(winner_rank, loser_rank, na.rm = TRUE),
+    higher_rank = pmax(winner_rank, loser_rank, na.rm = TRUE),
+    lower_rank_wins = ifelse(winner_rank > loser_rank, 0, 1),  # lower rank wins if winner has better rank
+    rank_diff = higher_rank - lower_rank
+  )
+
+# STEP 2: Filter out matches where rank info is missing or the ranks are tied
+model_data <- matches |> 
+  filter(!is.na(lower_rank_wins), !is.na(rank_diff), winner_rank != loser_rank)
+
+# STEP 3: Preview dataset used for modeling
+glimpse(model_data)
+
+# STEP 4: Save a CSV (optional)
+write_csv(model_data, "tennis_model_data.csv")
+
+# STEP 5: Exploratory plot — how often does the lower-ranked player win by rank difference?
+model_data |> 
+  group_by(rank_diff) |> 
+  summarise(prop_lower_win = mean(lower_rank_wins), n = n()) |> 
+  filter(n > 10, rank_diff < 200) |> 
+  ggplot(aes(x = rank_diff, y = prop_lower_win)) +
+  geom_line(color = "pink") +
+  geom_smooth(method = "loess", se = FALSE, color = "black") +
+  labs(
+    title = "Probability Lower-Ranked Player Wins by Rank Difference",
+    x = "Rank Difference (Higher - Lower)",
+    y = "Proportion Lower-Ranked Player Wins"
+  ) +
+  theme_minimal()
+
+```
+
+```{r}
+library(tibble)
+library(ggplot2)
+
+# Set up reproducibility
+set.seed(123)
+
+# Sample a manageable number of rows for modeling
+model_sample <- model_data |> 
+  filter(!is.na(rank_diff), !is.na(lower_rank_wins)) |> 
+  slice_sample(n = 5000)
+
+# Create a grid of plausible beta values
+beta0_vals <- seq(-3, 3, length.out = 100)
+beta1_vals <- seq(-0.05, 0.05, length.out = 100)
+param_grid <- expand.grid(beta0 = beta0_vals, beta1 = beta1_vals)
+
+# Define log-likelihood function
+log_likelihood <- function(beta0, beta1, x, y) {
+  eta <- beta0 + beta1 * x
+  p <- 1 / (1 + exp(-eta))
+  if (any(p == 0 | p == 1)) return(-Inf)
+  sum(dbinom(y, size = 1, prob = p, log = TRUE))
+}
+
+# Compute log-likelihoods safely
+loglik_vals <- purrr::map2_dbl(
+  param_grid$beta0,
+  param_grid$beta1,
+  ~ log_likelihood(.x, .y, model_sample$rank_diff, model_sample$lower_rank_wins)
+)
+
+# Apply log-sum-exp trick for numerical stability
+loglik_max <- max(loglik_vals, na.rm = TRUE)
+loglik_stable <- loglik_vals - loglik_max
+posterior_unnormalized <- exp(loglik_stable)
+posterior_probs <- posterior_unnormalized / sum(posterior_unnormalized, na.rm = TRUE)
+
+# Add to grid
+param_grid$posterior <- posterior_probs
+
+# Remove rows with NA or 0 weight to avoid slice_sample error
+param_grid_clean <- param_grid |> filter(!is.na(posterior) & posterior > 0)
+
+# Sample from posterior safely
+set.seed(321)
+posterior_samples <- param_grid_clean |> 
+  slice_sample(n = 5000, weight_by = posterior)
+
+# Plot posterior of beta1
+ggplot(posterior_samples, aes(x = beta1)) +
+  geom_histogram(bins = 50, fill = "pink", color = "white") +
+  labs(
+    title = "Posterior Distribution of Beta1",
+    x = "Beta1 (Effect of Rank Difference)",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+
+```
+```{r}
+# Summarize posterior samples
+beta1_summary <- posterior_samples |> 
+  summarise(
+    mean_beta1 = mean(beta1),
+    sd_beta1 = sd(beta1),
+    lower_90 = quantile(beta1, 0.05),
+    upper_90 = quantile(beta1, 0.95)
+  )
+
+print(beta1_summary)
+
+# Interpretation comment (as a printed message)
+cat("Interpretation:\n")
+cat("The posterior mean of beta1 tells us the average effect of a 1-point increase in rank difference.\n")
+cat("If beta1 is negative, it means the greater the rank difference (i.e., when players are farther apart in rank),\n")
+cat("the *less* likely it is that the lower-ranked player wins — which makes intuitive sense.\n")
+cat("The 90% credible interval shows the range of plausible values for beta1 under our model.\n")
+
+```
+
+```{r}
+
+# Step 1: Define Priors for probability of winning a point on serve
+x_vals <- seq(0, 1, length.out = 500)
+
+# 1. Non-informative prior (Uniform[0,1])
+prior1 <- dbeta(x_vals, 1, 1)
+
+# 2. Match-Based Prior: Nadal won 46 out of 66 points in prior match
+alpha2 <- 47  # 46 + 1
+beta2 <- 21   # 66 - 46 + 1
+prior2 <- dbeta(x_vals, alpha2, beta2)
+
+# 3. Subjective Prior: mean = 0.75, ~2% probability < 0.70
+alphas <- seq(0.01, 100, length.out = 2000)
+betas <- alphas * (1 - 0.75) / 0.75
+target_prob <- 0.02
+prob_less_than_70 <- pbeta(0.70, alphas, betas)
+
+subjective_prior_params <- tibble(alphas, betas, prob_less_than_70) |>
+  mutate(error = abs(prob_less_than_70 - target_prob)) |>
+  slice_min(error, n = 1)
+
+alpha3 <- subjective_prior_params$alphas
+beta3 <- subjective_prior_params$betas
+prior3 <- dbeta(x_vals, alpha3, beta3)
+
+# Combine into single tibble for plotting
+priors_df <- tibble(
+  x = rep(x_vals, 3),
+  density = c(prior1, prior2, prior3),
+  prior_type = rep(c("Non-informative", "Match-based", "Subjective"), each = length(x_vals))
+)
+
+# Plot all priors
+ggplot(priors_df, aes(x = x, y = density, color = prior_type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Prior Distributions for Serve Success Probability",
+       x = "Probability of Winning Point on Serve", y = "Density") +
+  theme_minimal()
+
+```
+```{r}
+matches <- read_csv("../Data/atp_matches_till_2022.csv")
+
+# Filter to find all Nadal vs. Djokovic matches
+nadal_djokovic_matches <- matches |> 
+  filter((winner_name == "Rafael Nadal" & loser_name == "Novak Djokovic") |
+         (winner_name == "Novak Djokovic" & loser_name == "Rafael Nadal"))
+
+write.csv(nadal_djokovic_matches, "nadal_djokovic_2020_french_open.csv", row.names = FALSE)
+
+```
+```{r}
+# Step 1: Read the match-level data from your uploaded CSV
+nadal_data <- read_csv("nadal_djokovic_2020_french_open.csv", show_col_types = FALSE)
+
+# Step 2: Estimate service points and points won by Nadal
+# We estimate total service points as:
+#   total_service_pts = w_1stIn + (w_svpt - w_1stIn)
+#   total_pts_won = w_1stWon + w_2ndWon
+
+nadal_summary <- nadal_data |>
+  summarise(
+    total_service_pts = sum(w_svpt, na.rm = TRUE),
+    total_pts_won = sum(w_1stWon + w_2ndWon, na.rm = TRUE)
+  )
+
+# Extract numbers
+n_won <- nadal_summary$total_pts_won
+n_total <- nadal_summary$total_service_pts
+
+# Step 3: Set up priors for p = P(Nadal wins a point on serve)
+# Non-informative prior: Beta(1, 1)
+alpha_noninf <- 1
+beta_noninf <- 1
+
+# Informative prior based on prior match (e.g., Nadal won 46 out of 66)
+alpha_match <- 46 + 1
+beta_match <- (66 - 46) + 1
+
+# Informative prior based on expert opinion: mean = 0.75, P(p < 0.70) ≈ 0.02
+alphas <- seq(0.01, 100, length.out = 2000)
+betas <- alphas * (1 - 0.75) / 0.75
+target_prob <- 0.02
+prob_less_70 <- pbeta(0.70, alphas, betas)
+expert_prior <- tibble(alphas, betas, prob_less_70) |>
+  mutate(diff = abs(prob_less_70 - target_prob)) |>
+  slice_min(diff, n = 1)
+
+alpha_expert <- expert_prior$alphas
+beta_expert <- expert_prior$betas
+
+# Step 4: Update priors with observed data (Bayes)
+posterior_noninf <- c(alpha_noninf + n_won, beta_noninf + n_total - n_won)
+posterior_match <- c(alpha_match + n_won, beta_match + n_total - n_won)
+posterior_expert <- c(alpha_expert + n_won, beta_expert + n_total - n_won)
+
+# Step 5: Plot priors
+p_seq <- seq(0, 1, length.out = 500)
+priors_df <- tibble(
+  p = rep(p_seq, 3),
+  density = c(dbeta(p_seq, alpha_noninf, beta_noninf),
+              dbeta(p_seq, alpha_match, beta_match),
+              dbeta(p_seq, alpha_expert, beta_expert)),
+  type = rep(c("Non-informative", "Match-based", "Expert-based"), each = length(p_seq))
+)
+
+ggplot(priors_df, aes(x = p, y = density, color = type)) +
+  geom_line(size = 1) +
+  labs(title = "Prior Distributions for P(Nadal Wins Serve Point)",
+       x = "Probability", y = "Density") +
+  theme_minimal()
+
+# Step 6: Plot posteriors
+posteriors_df <- tibble(
+  p = rep(p_seq, 3),
+  density = c(dbeta(p_seq, posterior_noninf[1], posterior_noninf[2]),
+              dbeta(p_seq, posterior_match[1], posterior_match[2]),
+              dbeta(p_seq, posterior_expert[1], posterior_expert[2])),
+  type = rep(c("Non-informative Posterior", "Match-based Posterior", "Expert-based Posterior"), each = length(p_seq))
+)
+
+ggplot(posteriors_df, aes(x = p, y = density, color = type)) +
+  geom_line(size = 1) +
+  labs(title = "Posterior Distributions after Observing 2020 Match Data",
+       x = "Probability", y = "Density") +
+  theme_minimal()
+
+# Step 7: Posterior summaries
+summary_df <- tibble(
+  type = c("Non-informative", "Match-based", "Expert-based"),
+  mean = c(posterior_noninf[1] / sum(posterior_noninf),
+           posterior_match[1] / sum(posterior_match),
+           posterior_expert[1] / sum(posterior_expert)),
+  lower_90 = c(qbeta(0.05, posterior_noninf[1], posterior_noninf[2]),
+               qbeta(0.05, posterior_match[1], posterior_match[2]),
+               qbeta(0.05, posterior_expert[1], posterior_expert[2])),
+  upper_90 = c(qbeta(0.95, posterior_noninf[1], posterior_noninf[2]),
+               qbeta(0.95, posterior_match[1], posterior_match[2]),
+               qbeta(0.95, posterior_expert[1], posterior_expert[2]))
+)
+
+summary_df
+
+```
+

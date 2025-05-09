@@ -1,0 +1,303 @@
+---
+title: "SoccerExploratory"
+format: html
+---
+
+```{r}
+library(readr)
+library(dplyr)
+
+# Read the uploaded FIFA data
+fifa <- read_csv("../Data/players_22.csv", show_col_types = FALSE)
+
+# Print column names to double-check what's available
+print(colnames(fifa))
+
+# Select relevant columns (make sure all exist in your data)
+fifa_clean <- fifa |>
+  select(
+    short_name, age, nationality_name, club_name, overall, potential,
+    pace, shooting, passing, dribbling, defending, physic
+  ) |>
+  filter(if_all(c(pace, shooting, passing, dribbling, defending, physic), ~ !is.na(.))) |>
+  distinct()
+
+# Preview the cleaned dataset
+glimpse(fifa_clean)
+
+# Save for future use
+write_csv(fifa_clean, "fifa_clean.csv")
+
+```
+
+
+```{r}
+library(ggplot2)
+library(GGally)
+library(tidyr)
+
+# Read the cleaned dataset
+fifa <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+
+# Part 1: Exploring Key Features
+# View summary statistics
+summary_stats <- fifa |>
+  summarise(
+    avg_age = mean(age, na.rm = TRUE),
+    avg_overall = mean(overall, na.rm = TRUE),
+    avg_potential = mean(potential, na.rm = TRUE),
+    avg_pace = mean(pace, na.rm = TRUE),
+    avg_shooting = mean(shooting, na.rm = TRUE),
+    avg_passing = mean(passing, na.rm = TRUE),
+    avg_dribbling = mean(dribbling, na.rm = TRUE),
+    avg_defending = mean(defending, na.rm = TRUE),
+    avg_physic = mean(physic, na.rm = TRUE)
+  )
+
+print(summary_stats)
+
+# Plot: Distribution of player overall ratings
+ggplot(fifa, aes(x = overall)) +
+  geom_histogram(bins = 30, fill = "pink", color = "white") +
+  labs(
+    title = "Distribution of Overall Player Ratings",
+    x = "Overall Rating", y = "Count"
+  ) +
+  theme_minimal()
+
+# Plot: Overall rating vs. Potential
+ggplot(fifa, aes(x = overall, y = potential)) +
+  geom_point(alpha = 0.3, color = "deeppink") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(
+    title = "Overall vs Potential Ratings",
+    x = "Overall Rating", y = "Potential"
+  ) +
+  theme_minimal()
+
+# Plot: Correlation matrix for skills
+skill_features <- fifa |>
+  select(overall, potential, pace, shooting, passing, dribbling, defending, physic)
+
+ggpairs(skill_features,
+        lower = list(continuous = wrap("smooth", alpha = 0.2, size = 0.2)),
+        title = "Pairwise Plots of Key Player Attributes")
+
+
+```
+```{r}
+library(cluster)
+library(factoextra)
+
+# Load cleaned data
+fifa <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+
+# Select numeric skill features only for clustering
+fifa_cluster <- fifa |>
+  select(pace, shooting, passing, dribbling, defending, physic)
+
+# Standardize the data (important for K-means)
+fifa_scaled <- scale(fifa_cluster)
+
+# Run K-means clustering with 4 clusters (can experiment with 3–6)
+set.seed(123)
+k4 <- kmeans(fifa_scaled, centers = 4, nstart = 20)
+
+# Add cluster assignments back to the original data
+fifa <- fifa |>
+  mutate(Cluster = as.factor(k4$cluster))
+
+# Plot cluster centers for interpretation
+cluster_centers <- as_tibble(k4$centers)
+cluster_centers$Cluster <- factor(1:4)
+
+cluster_centers_long <- cluster_centers |>
+  pivot_longer(-Cluster, names_to = "Attribute", values_to = "Value")
+
+ggplot(cluster_centers_long, aes(x = Attribute, y = Value, fill = Cluster)) +
+  geom_col(position = "dodge") +
+  labs(title = "Cluster Skill Profiles", y = "Standardized Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Visualize clusters using PCA
+fviz_cluster(k4, data = fifa_scaled, 
+             geom = "point", ellipse.type = "convex",
+             palette = "jco", ggtheme = theme_minimal())
+
+# Preview how clusters are distributed
+table(fifa$Cluster)
+
+# Optional: check top players per cluster
+fifa |>
+  group_by(Cluster) |>
+  slice_max(order_by = overall, n = 5) |>
+  select(Cluster, short_name, club_name, overall, pace, shooting, passing, dribbling, defending, physic)
+
+```
+
+```{r}
+
+# Load the clustered data
+fifa <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+
+# Recreate the same clustering so clusters match
+skill_features <- fifa |>
+  select(pace, shooting, passing, dribbling, defending, physic)
+
+fifa_scaled <- scale(skill_features)
+set.seed(123)
+k4 <- kmeans(fifa_scaled, centers = 4, nstart = 20)
+fifa <- fifa |>
+  mutate(Cluster = as.factor(k4$cluster))
+
+# Part 4: Cluster Interpretation
+
+# Compute average skill attributes per cluster
+cluster_summary <- fifa |>
+  group_by(Cluster) |>
+  summarise(
+    avg_pace = mean(pace),
+    avg_shooting = mean(shooting),
+    avg_passing = mean(passing),
+    avg_dribbling = mean(dribbling),
+    avg_defending = mean(defending),
+    avg_physic = mean(physic),
+    count = n()
+  )
+
+print(cluster_summary)
+
+
+# Reshape to long format for plotting
+cluster_summary_long <- cluster_summary |>
+  pivot_longer(cols = starts_with("avg_"),
+               names_to = "Attribute",
+               values_to = "Average") |>
+  filter(Attribute != "count")
+
+# Bar plot of attribute averages per cluster
+ggplot(cluster_summary_long, aes(x = Attribute, y = Average, fill = Cluster)) +
+  geom_col(position = "dodge") +
+  labs(title = "Average Skill Ratings by Cluster",
+       y = "Average (Raw Rating)",
+       x = "Skill Attribute") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+
+
+# Load clustered data again
+fifa <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+
+# Recreate clustering for consistency
+fifa_scaled <- scale(fifa |> select(pace, shooting, passing, dribbling, defending, physic))
+set.seed(123)
+k4 <- kmeans(fifa_scaled, centers = 4, nstart = 20)
+fifa <- fifa |> mutate(Cluster = as.factor(k4$cluster))
+
+# Part 5: Cluster Sizes
+cluster_sizes <- fifa|>
+  count(Cluster) |>
+  arrange(desc(n))
+
+print(cluster_sizes)
+
+# Plot: Cluster size
+ggplot(cluster_sizes, aes(x = Cluster, y = n, fill = Cluster)) +
+  geom_col() +
+  labs(
+    title = "Number of Players in Each Cluster",
+    x = "Cluster", y = "Number of Players"
+  ) +
+  theme_minimal()
+
+
+# Part 5b: Country Representation by Cluster
+top_countries <- fifa|>
+  count(nationality_name, sort = TRUE) |>
+  top_n(5, n) |>
+  pull(nationality_name)
+
+fifa_top <- fifa |>
+  filter(nationality_name %in% top_countries)
+
+ggplot(fifa_top, aes(x = nationality_name, fill = Cluster)) +
+  geom_bar(position = "dodge") +
+  labs(
+    title = "Cluster Distribution for Top 5 Nationalities",
+    x = "Country", y = "Number of Players"
+  ) +
+  theme_minimal()
+
+```
+```{r}
+# Load and reattach cluster labels to fifa_clean
+fifa <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+
+# Recreate clustering (for full consistency if re-running separately)
+fifa_scaled <- scale(fifa |> select(pace, shooting, passing, dribbling, defending, physic))
+set.seed(123)
+k4 <- kmeans(fifa_scaled, centers = 4, nstart = 20)
+fifa <- fifa |>
+  mutate(Cluster = as.factor(k4$cluster))
+
+# Part 6: Player Archetypes
+# Let's look at average stats by cluster
+cluster_means <- fifa|>
+  group_by(Cluster) |>
+  summarise(
+    avg_overall = mean(overall, na.rm = TRUE),
+    avg_pace = mean(pace, na.rm = TRUE),
+    avg_shooting = mean(shooting, na.rm = TRUE),
+    avg_passing = mean(passing, na.rm = TRUE),
+    avg_dribbling = mean(dribbling, na.rm = TRUE),
+    avg_defending = mean(defending, na.rm = TRUE),
+    avg_physic = mean(physic, na.rm = TRUE)
+  )
+
+print(cluster_means)
+
+# Plot radar-style profile for each cluster
+library(fmsb)
+
+# Reshape for radar chart format
+radar_data <- as.data.frame(cluster_means[, -1])
+rownames(radar_data) <- paste("Cluster", cluster_means$Cluster)
+
+# Radar chart requires a max/min row at the top
+radar_plot_data <- rbind(
+  rep(100, 7),
+  rep(0, 7),
+  radar_data
+)
+
+colnames(radar_plot_data) <- c("Overall", "Pace", "Shooting", "Passing", "Dribbling", "Defending", "Physic")
+
+# Plot radar
+radarchart(radar_plot_data, axistype = 1,
+           pcol = c("pink", "blanchedalmond", "lavender", "hotpink"),
+           pfcol = c("#FF666680", "#66B2FF80", "#99FF9980", "#CC99FF80"),
+           plwd = 2,
+           plty = 1,
+           cglcol = "grey",
+           cglty = 1,
+           axislabcol = "grey",
+           vlcex = 0.8,
+           title = "Cluster Attribute Profiles")
+
+legend("topright", legend = rownames(radar_data),
+       col = c("pink", "blanchedalmond", "lavender", "hotpink"), lty = 1, lwd = 2, bty = "n")
+
+# Optional: Print sample players from each cluster
+fifa |>
+  group_by(Cluster) |>
+  slice_max(order_by = overall, n = 3) |>
+  select(Cluster, short_name, club_name, nationality_name, overall, pace, shooting, passing, dribbling, defending, physic)
+
+
+
+```

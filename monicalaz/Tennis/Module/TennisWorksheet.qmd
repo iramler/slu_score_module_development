@@ -1,0 +1,204 @@
+---
+title: "TennisWorksheet"
+format: docx
+---
+
+# Introduction
+
+This worksheet will guide you through a full Bayesian data analysis using real ATP match data from 2010 to 2022. We'll start by building a likelihood model for the probability that a lower-ranked tennis player beats a higher-ranked one. Then, we’ll explore how prior beliefs can affect our conclusions — visually comparing **prior** and **posterior** distributions.
+
+Your final goal is to answer this:
+
+> **How do rank differences influence tennis match outcomes, and how do different prior beliefs impact the Bayesian analysis of player success?**
+
+---
+
+# Part 1 – Likelihood: Modeling Match Outcomes with Rank Differences
+
+We’ll begin by creating a cleaned dataset of matches, then modeling the probability that a lower-ranked player wins using a grid-based Bayesian likelihood approach.
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(purrr)
+
+# Load and clean matches
+matches <- read_csv("../Data/atp_matches_till_2022.csv")
+cleaned <- matches |>
+  mutate(tourney_date = ymd(tourney_date)) |>
+  filter(year(tourney_date) >= 2010 & year(tourney_date) <= 2022) |>
+  filter(!is.na(winner_rank) & !is.na(loser_rank)) |>
+  mutate(
+    winner_rank = as.integer(winner_rank),
+    loser_rank = as.integer(loser_rank),
+    lower_rank_won = if_else(winner_rank > loser_rank, 1, 0),
+    lower_rank_player = if_else(winner_rank > loser_rank, winner_name, loser_name),
+    surface = factor(surface),
+    match_year = year(tourney_date)
+  ) |>
+  select(tourney_date, match_year, surface, winner_name, loser_name,
+         winner_rank, loser_rank, lower_rank_player, lower_rank_won)
+
+# Add variables for modeling
+model_data <- cleaned |>
+  mutate(
+    lower_rank = pmin(winner_rank, loser_rank),
+    higher_rank = pmax(winner_rank, loser_rank),
+    lower_rank_wins = ifelse(winner_rank > loser_rank, 0, 1),
+    rank_diff = higher_rank - lower_rank
+  ) |>
+  filter(winner_rank != loser_rank)
+
+# Sample subset for modeling
+set.seed(123)
+model_sample <- model_data |> slice_sample(n = 5000)
+
+# Create grid of beta values
+beta0_vals <- seq(-3, 3, length.out = 100)
+beta1_vals <- seq(-0.05, 0.05, length.out = 100)
+param_grid <- expand.grid(beta0 = beta0_vals, beta1 = beta1_vals)
+
+# Log-likelihood function
+log_likelihood <- function(beta0, beta1, x, y) {
+  eta <- beta0 + beta1 * x
+  p <- 1 / (1 + exp(-eta))
+  if (any(p == 0 | p == 1)) return(-Inf)
+  sum(dbinom(y, size = 1, prob = p, log = TRUE))
+}
+
+# Compute likelihoods
+loglik_vals <- map2_dbl(
+  param_grid$beta0,
+  param_grid$beta1,
+  ~ log_likelihood(.x, .y, model_sample$rank_diff, model_sample$lower_rank_wins)
+)
+
+# Posterior via grid
+loglik_max <- max(loglik_vals)
+posterior <- exp(loglik_vals - loglik_max)
+posterior <- posterior / sum(posterior)
+param_grid$posterior <- posterior
+
+# Sample from posterior
+set.seed(321)
+posterior_samples <- param_grid |>
+  filter(posterior > 0) |>
+  slice_sample(n = 5000, weight_by = posterior)
+
+# Plot posterior of beta1
+ggplot(posterior_samples, aes(x = beta1)) +
+  geom_histogram(bins = 50, fill = "pink", color = "white") +
+  labs(title = "Posterior Distribution of Beta1 (Effect of Rank Difference)",
+       x = "Beta1", y = "Frequency") +
+  theme_minimal()
+```
+
+### Questions:
+1. What does a negative `beta1` value suggest about rank difference and match outcomes?
+2. What is the average value of `beta1` in your posterior?
+3. How wide is the 90% credible interval?
+
+---
+
+# Part 2 – Introduction to Prior Distributions
+
+Let’s now explore what different **prior beliefs** might look like for a player’s success rate. Below are three types of priors we’ll construct for a serve win probability:
+
+- **Non-informative**: completely flat (Beta(1, 1))
+- **Match-Based**: Nadal won 46 of 66 points in a previous match (Beta(47, 21))
+- **Expert**: A sports announcer believes Nadal wins 75% of points, with <2% chance he wins less than 70%
+
+```{r}
+x_vals <- seq(0, 1, length.out = 500)
+prior1 <- dbeta(x_vals, 1, 1)
+prior2 <- dbeta(x_vals, 47, 21)
+
+alphas <- seq(0.01, 100, length.out = 2000)
+betas <- alphas * (1 - 0.75) / 0.75
+prob_70 <- pbeta(0.70, alphas, betas)
+
+expert_params <- tibble(alphas, betas, prob_70) |>
+  mutate(error = abs(prob_70 - 0.02)) |>
+  slice_min(error, n = 1)
+
+prior3 <- dbeta(x_vals, expert_params$alphas, expert_params$betas)
+
+priors_df <- tibble(
+  x = rep(x_vals, 3),
+  density = c(prior1, prior2, prior3),
+  prior_type = rep(c("Non-informative", "Match-based", "Expert-based"), each = length(x_vals))
+)
+
+ggplot(priors_df, aes(x = x, y = density, color = prior_type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Prior Distributions for Serve Success Probability",
+       x = "Probability", y = "Density") +
+  theme_minimal()
+```
+
+### Questions:
+1. Which prior has the sharpest peak? What does this indicate?
+2. How do the match-based and expert-based priors differ?
+3. Which prior reflects the most uncertainty?
+
+---
+
+# Part 3 – Posterior Distributions with Match Data
+
+We’ll now combine our priors with real data to see how beliefs update. From your cleaned match data, we estimated Nadal’s service point performance as follows:
+
+```{r}
+nadal_data <- read_csv("../Data/nadal_djokovic_2020_french_open.csv")
+
+nadal_summary <- nadal_data |> summarise(
+  total_pts = sum(w_svpt, na.rm = TRUE),
+  pts_won = sum(w_1stWon + w_2ndWon, na.rm = TRUE)
+)
+
+n_total <- nadal_summary$total_pts
+n_won <- nadal_summary$pts_won
+```
+
+Now let’s update all three priors using a Beta posterior:
+
+```{r}
+posterior_noninf <- c(1 + n_won, 1 + n_total - n_won)
+posterior_match  <- c(47 + n_won, 21 + n_total - n_won)
+posterior_expert <- c(expert_params$alphas + n_won, expert_params$betas + n_total - n_won)
+
+p_vals <- seq(0, 1, length.out = 500)
+posterior_df <- tibble(
+  p = rep(p_vals, 3),
+  density = c(dbeta(p_vals, posterior_noninf[1], posterior_noninf[2]),
+              dbeta(p_vals, posterior_match[1], posterior_match[2]),
+              dbeta(p_vals, posterior_expert[1], posterior_expert[2])),
+  type = rep(c("Non-informative Posterior", "Match-based Posterior", "Expert-based Posterior"), each = length(p_vals))
+)
+
+ggplot(posterior_df, aes(x = p, y = density, color = type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Posterior Distributions after Observing Match Data",
+       x = "Serve Win Probability", y = "Density") +
+  theme_minimal()
+```
+
+### Questions:
+1. Which posterior is most concentrated (i.e., has least uncertainty)?
+2. Which prior had the strongest influence on its posterior?
+3. What is the estimated probability Nadal wins a point on serve?
+
+---
+
+# Wrap-Up
+
+In this worksheet, you:
+
+- Modeled match outcomes using rank differences
+- Constructed and visualized different priors
+- Updated each prior using Bayesian inference with real match data
+
+> **Final Reflection:**  
+How did different prior beliefs affect your conclusions about Nadal’s serve performance? Which prior-posterior pair do you trust most, and why?
+

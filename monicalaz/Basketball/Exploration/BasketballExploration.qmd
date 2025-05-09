@@ -1,0 +1,242 @@
+---
+title: "BasketballExploration"
+format: html
+---
+
+
+```{r setup, message=FALSE, warning=FALSE}
+library(readr)
+library(dplyr)
+
+# Load your CSVs directly from the working directory
+nba_1996 <- read_csv("../Data/nba_1996_per_game.csv") |> mutate(season = 1996)
+nba_2005 <- read_csv("../Data/nba_2005_per_game.csv") |> mutate(season = 2005)
+nba_2015 <- read_csv("../Data/nba_2015_per_game.csv") |> mutate(season = 2015)
+nba_2024 <- read_csv("../Data/nba_2024_per_game.csv") |> mutate(season = 2024)
+
+# Combine them
+nba_all <- bind_rows(nba_1996, nba_2005, nba_2015, nba_2024)
+
+# Remove any repeated header rows
+nba_all <- nba_all |> filter(Player != "Player")
+
+# Add an Era column
+nba_all <- nba_all |> mutate(
+  Era = case_when(
+    season < 2000 ~ "1990s",
+    season < 2010 ~ "2000s",
+    season < 2020 ~ "2010s",
+    TRUE ~ "2020s"
+  )
+)
+
+# Preview
+head(nba_all)
+
+```
+
+```{r}
+nba_all |> 
+  group_by(Era) |> 
+  summarise(
+    avg_pts = mean(as.numeric(PTS), na.rm = TRUE),
+    avg_ast = mean(as.numeric(AST), na.rm = TRUE),
+    avg_trb = mean(as.numeric(TRB), na.rm = TRUE),
+    avg_3p = mean(as.numeric(`3P`), na.rm = TRUE),
+    avg_3p_attempts = mean(as.numeric(`3PA`), na.rm = TRUE),
+    avg_fg_pct = mean(as.numeric(`FG%`), na.rm = TRUE)
+  )
+write_csv(nba_all, "nba_all.csv")
+
+
+```
+
+```{r}
+library(ggplot2)
+
+ggplot(nba_all, aes(x = Era, y = as.numeric(PTS), fill = Era)) +
+  geom_boxplot() +
+  labs(title = "Points Per Game by Era", y = "Points", x = "Era") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(nba_all, aes(x = Era, y = as.numeric(`3P`), fill = Era)) +
+  geom_boxplot() +
+  labs(title = "3P Made per Game by Era", y = "3P Made", x = "Era") +
+  theme_minimal()
+```
+
+```{r}
+ggplot(nba_all, aes(x = Era, y = as.numeric(`3P`), fill = Era)) +
+  geom_boxplot() +
+  labs(title = "3P Made per Game by Era", y = "3P Made", x = "Era") +
+  theme_minimal()
+```
+
+```{r}
+library(ggridges)
+library(ggthemes)
+
+# Convert key stats to numeric (safely)
+nba_all <- nba_all |>
+  mutate(
+    PTS = as.numeric(PTS),
+    `3P` = as.numeric(`3P`),
+    `3PA` = as.numeric(`3PA`),
+    AST = as.numeric(AST),
+    TRB = as.numeric(TRB),
+    `FG%` = as.numeric(`FG%`)
+  )
+
+# Filter out extreme PTS outliers for smoother plots
+nba_filtered <- nba_all |>
+  filter(!is.na(PTS), PTS <= 50)
+
+###  1. Summary Table by Era
+nba_all |>
+  group_by(Era) |>
+  summarise(
+    avg_pts = mean(PTS, na.rm = TRUE),
+    avg_ast = mean(AST, na.rm = TRUE),
+    avg_trb = mean(TRB, na.rm = TRUE),
+    avg_3p = mean(`3P`, na.rm = TRUE),
+    avg_3pa = mean(`3PA`, na.rm = TRUE),
+    avg_fg_pct = mean(`FG%`, na.rm = TRUE)
+  )
+
+###  2. Boxplot: PTS by Era
+plot_pts_era <- ggplot(nba_all, aes(x = Era, y = PTS, fill = Era)) +
+  geom_boxplot() +
+  labs(title = "Points Per Game by Era", y = "PTS", x = "Era") +
+  theme_minimal()
+
+###  3. Boxplot: 3P by Era
+plot_3p_era <- ggplot(nba_all, aes(x = Era, y = `3P`, fill = Era)) +
+  geom_boxplot() +
+  labs(title = "3P Made per Game by Era", y = "3P", x = "Era") +
+  theme_minimal()
+
+###  4. Boxplot: PTS by Position and Era
+plot_pts_pos <- ggplot(nba_all, aes(x = Era, y = PTS, fill = Era)) +
+  geom_boxplot() +
+  facet_wrap(~ Pos) +
+  labs(title = "Points per Game by Position and Era", y = "PTS", x = "Era") +
+  theme_minimal()
+
+###  5. Ridgeline Plot: PTS by Position (Faceted by Era)
+plot_ridge <- ggplot(nba_filtered, aes(x = PTS, y = Pos, fill = Era)) +
+  geom_density_ridges(scale = 1.2, alpha = 0.7, rel_min_height = 0.01) +
+  facet_wrap(~ Era) +
+  labs(title = "Distribution of Points Per Game by Position and Era", x = "PTS", y = "Position") +
+  theme_minimal()
+
+###  6. Density Plot: 3PA by Era
+plot_3pa_density <- ggplot(nba_all, aes(x = `3PA`, fill = Era)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Density of 3PA by Era", x = "3PA", y = "Density") +
+  theme_minimal()
+
+###  7. Histogram: PTS Distribution by Era
+plot_pts_hist <- ggplot(nba_filtered, aes(x = PTS, fill = Era)) +
+  geom_histogram(bins = 30, alpha = 0.7, color = "white") +
+  facet_wrap(~ Era) +
+  labs(title = "Histogram of Points per Game by Era", x = "PTS", y = "Count") +
+  theme_minimal()
+
+# Display all plots
+plot_pts_era
+plot_3p_era
+plot_pts_pos
+plot_ridge
+plot_3pa_density
+plot_pts_hist
+
+```
+
+```{r}
+
+# Clean dataset for modeling
+nba_model_data <- nba_all |>
+  mutate(
+    PTS = as.numeric(PTS),
+    `3P` = as.numeric(`3P`),
+    AST = as.numeric(AST),
+    `FG%` = as.numeric(`FG%`),
+    Era = factor(Era)
+  ) |>
+  filter(!is.na(PTS), !is.na(`3P`), !is.na(AST), !is.na(`FG%`))
+
+# 1. Simple regression model
+model_simple <- lm(PTS ~ `3P` + AST + `FG%`, data = nba_model_data)
+summary(model_simple)
+
+# 2. Add Era to the model
+model_era <- lm(PTS ~ `3P` + AST + `FG%` + Era, data = nba_model_data)
+summary(model_era)
+
+# 3. Interaction: Does the effect of 3P vary by Era?
+model_interact <- lm(PTS ~ `3P` * Era + AST + `FG%`, data = nba_model_data)
+summary(model_interact)
+
+# 4. Visualization: 3P vs. PTS by Era
+ggplot(nba_model_data, aes(x = `3P`, y = PTS, color = Era)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    title = "Relationship Between 3P and PTS by Era",
+    x = "3P Made per Game",
+    y = "Points per Game"
+  ) +
+  theme_minimal()
+
+# 5. View high-scoring players
+nba_model_data |>
+  filter(PTS > 30) |>
+  select(Player, Era, PTS, `3P`, AST)
+
+```
+
+```{r}
+
+# 1. Prepare data for clustering
+nba_cluster <- nba_all |>
+  mutate(
+    PTS = as.numeric(PTS),
+    AST = as.numeric(AST),
+    TRB = as.numeric(TRB),
+    `3P` = as.numeric(`3P`)
+  ) |>
+  filter(!is.na(PTS), !is.na(AST), !is.na(TRB), !is.na(`3P`))
+
+# 2. Select features to define player roles
+role_vars <- nba_cluster |>
+  select(PTS, AST, TRB, `3P`)
+
+# 3. Standardize variables
+role_scaled <- scale(role_vars)
+
+# 4. K-means clustering: choose k = 4
+set.seed(42)
+k_result <- kmeans(role_scaled, centers = 4, nstart = 20)
+
+# 5. Add cluster labels back to original dataset
+nba_cluster <- nba_cluster |>
+  mutate(Cluster = as.factor(k_result$cluster))
+
+# 6. Visualize clusters using 2D projection (PCA-like)
+ggplot(nba_cluster, aes(x = AST, y = PTS, color = Cluster)) +
+  geom_point(alpha = 0.6) +
+  facet_wrap(~ Era) +
+  labs(
+    title = "Player Role Clusters by Era",
+    x = "Assists per Game",
+    y = "Points per Game"
+  ) +
+  theme_minimal()
+
+# 7. Check cluster centers to interpret roles
+cluster_centers <- as.data.frame(k_result$centers)
+cluster_centers
+
+```

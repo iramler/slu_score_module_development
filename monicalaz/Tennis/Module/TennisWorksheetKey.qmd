@@ -1,0 +1,142 @@
+---
+title: "TennisWorksheetKey"
+format: docx
+---
+
+
+# Introduction
+
+This is the answer key for the module where students explored how Bayesian analysis can be used to evaluate tennis match outcomes, specifically focusing on player ranking and serve success probability. The exercises build from logistic modeling to comparing prior and posterior beliefs about Nadal’s serve performance against Djokovic.
+
+---
+
+# Part 1: Likelihood Modeling with Rank Difference
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+# Read the cleaned dataset
+model_data <- read_csv("../Data/tennis_model_data.csv")
+
+# Exploratory plot: probability of lower-ranked win vs. rank difference
+model_data |> 
+  group_by(rank_diff) |> 
+  summarise(prop_lower_win = mean(lower_rank_wins), n = n()) |> 
+  filter(n > 10, rank_diff < 200) |> 
+  ggplot(aes(x = rank_diff, y = prop_lower_win)) +
+  geom_line(color = "pink") +
+  geom_smooth(method = "loess", se = FALSE, color = "black") +
+  labs(
+    title = "Probability Lower-Ranked Player Wins by Rank Difference",
+    x = "Rank Difference (Higher - Lower)",
+    y = "Proportion Lower-Ranked Player Wins"
+  ) +
+  theme_minimal()
+```
+
+**Q: What do you notice about the trend as rank difference increases?**  
+A: As the rank difference increases, the lower-ranked player's probability of winning decreases. This makes sense since the skill gap is wider.
+
+---
+
+# Part 2: Plotting Prior Beliefs
+
+```{r}
+library(tibble)
+
+# Define priors
+x_vals <- seq(0, 1, length.out = 500)
+
+prior1 <- dbeta(x_vals, 1, 1)  # Non-informative
+prior2 <- dbeta(x_vals, 47, 21)  # Match-based
+alpha3 <- 31
+beta3 <- 10.3
+prior3 <- dbeta(x_vals, alpha3, beta3)  # Expert-based
+
+priors_df <- tibble(
+  x = rep(x_vals, 3),
+  density = c(prior1, prior2, prior3),
+  prior_type = rep(c("Non-informative", "Match-based", "Subjective"), each = length(x_vals))
+)
+
+ggplot(priors_df, aes(x = x, y = density, color = prior_type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Prior Distributions for Serve Success Probability",
+       x = "Probability of Winning Point on Serve", y = "Density") +
+  theme_minimal()
+```
+
+**Q: Which prior is most skeptical of extreme values?**  
+A: The non-informative prior (Uniform) places equal density across all values and doesn’t favor any range.
+
+---
+
+# Part 3: Posterior Distributions for Nadal vs. Djokovic
+
+```{r}
+# Observed data
+n_won <- 56
+n_total <- 84
+
+# Posterior distributions
+posterior_noninf <- dbeta(x_vals, 1 + n_won, 1 + n_total - n_won)
+posterior_match <- dbeta(x_vals, 47 + n_won, 21 + n_total - n_won)
+posterior_expert <- dbeta(x_vals, alpha3 + n_won, beta3 + n_total - n_won)
+
+posteriors_df <- tibble(
+  x = rep(x_vals, 3),
+  density = c(posterior_noninf, posterior_match, posterior_expert),
+  type = rep(c("Non-informative Posterior", "Match-based Posterior", "Expert-based Posterior"), each = length(x_vals))
+)
+
+ggplot(posteriors_df, aes(x = x, y = density, color = type)) +
+  geom_line(size = 1.2) +
+  labs(title = "Posterior Distributions after Observing Nadal's 2020 Match",
+       x = "Probability Nadal Wins Serve Point", y = "Density") +
+  theme_minimal()
+```
+
+**Q: Do the posteriors differ substantially?**  
+A: Slightly — all are centered around ~0.665–0.668, but the expert prior results in a more confident (narrower) posterior.
+
+---
+
+# Posterior Summary Table
+
+```{r}
+summary_df <- tibble(
+  type = c("Non-informative", "Match-based", "Expert-based"),
+  mean = c(
+    (1 + n_won) / (1 + n_won + 1 + n_total - n_won),
+    (47 + n_won) / (47 + n_won + 21 + n_total - n_won),
+    (alpha3 + n_won) / (alpha3 + n_won + beta3 + n_total - n_won)
+  ),
+  lower_90 = c(
+    qbeta(0.05, 1 + n_won, 1 + n_total - n_won),
+    qbeta(0.05, 47 + n_won, 21 + n_total - n_won),
+    qbeta(0.05, alpha3 + n_won, beta3 + n_total - n_won)
+  ),
+  upper_90 = c(
+    qbeta(0.95, 1 + n_won, 1 + n_total - n_won),
+    qbeta(0.95, 47 + n_won, 21 + n_total - n_won),
+    qbeta(0.95, alpha3 + n_won, beta3 + n_total - n_won)
+  )
+)
+
+summary_df
+```
+
+**Q: Which posterior has the narrowest interval? Why?**  
+A: The expert-based posterior, because its prior was more concentrated (higher precision), making the update more confident.
+
+---
+
+# Final Reflection
+
+- All priors update toward the observed proportion (56/84 ≈ 0.667).
+- The choice of prior affects posterior spread but not the central tendency much here.
+- The more informative the prior, the more confident the posterior (narrower intervals).
+- Bayesian analysis gives us a full distribution of belief, not just a point estimate — that’s the key benefit here!
+

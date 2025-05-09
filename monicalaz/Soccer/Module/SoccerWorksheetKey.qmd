@@ -1,0 +1,193 @@
+---
+title: "SoccerWorksheetKey"
+format: docx
+---
+
+```{r}
+# Load packages
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(tidyr)
+library(cluster)
+library(factoextra)
+library(fmsb)
+
+# Load cleaned data
+fifa_clean <- read_csv("fifa_clean.csv", show_col_types = FALSE)
+```
+
+# ---- PART 1: EXPLORATORY ANALYSIS ----
+
+# Q1: What are the average values for age, overall rating, and key skills?
+
+```{r}
+summary_stats <- fifa_clean |>
+  summarise(
+    avg_age = mean(age),
+    avg_overall = mean(overall),
+    avg_pace = mean(pace),
+    avg_shooting = mean(shooting),
+    avg_passing = mean(passing),
+    avg_dribbling = mean(dribbling),
+    avg_defending = mean(defending),
+    avg_physic = mean(physic)
+  )
+summary_stats  # Answer: Shows averages (e.g., avg_overall ≈ 66.4)
+```
+
+# Q2: What does the distribution of overall player ratings look like?
+
+```{r}
+ggplot(fifa_clean, aes(x = overall)) +
+  geom_histogram(bins = 30, fill = "pink", color = "white") +
+  labs(title = "Distribution of Overall Ratings", x = "Overall", y = "Count") +
+  theme_minimal()
+# Answer: Most players have overall ratings between 60–75, with few outliers above 85.
+```
+
+# Q3: How does overall rating relate to potential?
+
+```{r}
+ggplot(fifa_clean, aes(x = overall, y = potential)) +
+  geom_point(alpha = 0.3, color = "deeppink") +
+  geom_smooth(method = "lm", se = FALSE, color = "black") +
+  labs(title = "Overall vs Potential", x = "Overall", y = "Potential") +
+  theme_minimal()
+# Answer: There is a strong positive linear relationship — better current players often have higher potential.
+```
+
+# Q4: Create a pairwise correlation plot of all skill attributes.
+
+```{r}
+skill_subset <- fifa_clean |>
+  select(overall, potential, pace, shooting, passing, dribbling, defending, physic)
+
+ggpairs(skill_subset, lower = list(continuous = wrap("smooth", alpha = 0.3, size = 0.1)),
+        title = "Pairwise Skill Attribute Correlations")
+# Answer: Overall rating is most correlated with physic, dribbling, and shooting. Passing is also moderately correlated.
+```
+
+# ---- PART 2: K-MEANS CLUSTERING ----
+
+```{r}
+
+fifa_cluster <- fifa_clean |> select(pace, shooting, passing, dribbling, defending, physic)
+fifa_scaled <- scale(fifa_cluster)
+set.seed(123)
+k4 <- kmeans(fifa_scaled, centers = 4, nstart = 20)
+fifa_clean <- fifa_clean |> mutate(Cluster = as.factor(k4$cluster))
+```
+
+# Q5: Use K-means to group players into 4 clusters — done above.
+
+# Q6: Plot the standardized skill profiles for each cluster
+
+```{r}
+centers <- as_tibble(k4$centers) |> mutate(Cluster = as.factor(1:4)) |> 
+  pivot_longer(-Cluster, names_to = "Attribute", values_to = "Value")
+
+ggplot(centers, aes(x = Attribute, y = Value, fill = Cluster)) +
+  geom_col(position = "dodge") +
+  labs(title = "Cluster Skill Profiles", y = "Standardized Skill Value") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+# Answer: Each cluster emphasizes different skills — e.g., Cluster 1 may be strong defenders while Cluster 3 may be attackers.
+```
+
+# Q7: Visualize clusters using PCA
+
+```{r}
+fviz_cluster(k4, data = fifa_scaled, geom = "point", palette = "jco", ggtheme = theme_minimal())
+# Answer: Players form 4 distinguishable groups based on their skill attributes.
+```
+
+# ---- PART 3: CLUSTER INTERPRETATION ----
+
+# Q8: How do average raw skill ratings vary across clusters?
+
+```{r}
+cluster_summary <- fifa_clean |>
+  group_by(Cluster) |>
+  summarise(across(c(pace, shooting, passing, dribbling, defending, physic), mean))
+cluster_summary
+# Answer: Each cluster specializes — some have higher dribbling and pace, others in defending and physic.
+```
+
+# Q9: Which cluster has the most players?
+
+```{r}
+cluster_sizes <- fifa_clean |> count(Cluster, sort = TRUE)
+cluster_sizes
+ggplot(cluster_sizes, aes(x = Cluster, y = n, fill = Cluster)) +
+  geom_col() +
+  labs(title = "Number of Players in Each Cluster", x = "Cluster", y = "Count") +
+  theme_minimal()
+# Answer: Cluster with most players likely represents well-rounded or average-skill players.
+
+```
+
+# Q10: How are clusters distributed among top 5 nationalities?
+
+```{r}
+top_countries <- fifa_clean |>
+  count(nationality_name, sort = TRUE) |>
+  slice_max(n, n = 5) |>
+  pull(nationality_name)
+
+fifa_top <- fifa_clean |> filter(nationality_name %in% top_countries)
+
+ggplot(fifa_top, aes(x = nationality_name, fill = Cluster)) +
+  geom_bar(position = "dodge") +
+  labs(title = "Cluster Distribution by Country", x = "Country", y = "Number of Players") +
+  theme_minimal()
+# Answer: Distributions vary — e.g., Brazil and France may dominate attacker or technical clusters.
+```
+
+# ---- PART 4: PLAYER ARCHETYPES ----
+
+```{r}
+# Create radar chart of player archetypes by cluster
+
+# Step 1: Compute means
+radar_data <- fifa_clean |>
+  group_by(Cluster) |>
+  summarise(
+    Overall = mean(overall),
+    Pace = mean(pace),
+    Shooting = mean(shooting),
+    Passing = mean(passing),
+    Dribbling = mean(dribbling),
+    Defending = mean(defending),
+    Physic = mean(physic)
+  ) |> 
+  as.data.frame()
+
+# Step 2: Convert to proper format for radar chart
+rownames(radar_data) <- radar_data$Cluster
+radar_data <- radar_data[, -1]
+
+# Step 3: Add max and min rows
+radar_plot_data <- rbind(
+  rep(100, 7),  # max
+  rep(0, 7),    # min
+  radar_data    # actual cluster data
+)
+
+# Step 4: Draw radar chart
+radarchart(radar_plot_data, axistype = 1,
+           pcol = c("pink", "hotpink", "blanchedalmond", "orchid"),
+           pfcol = c("#FF69B480", "#FF149380", "#FFDAB980", "#DA70D680"),
+           plwd = 2, plty = 1,
+           cglcol = "grey", cglty = 1,
+           axislabcol = "grey", vlcex = 0.8,
+           title = "Radar Profiles of Player Clusters")
+
+legend("topright", legend = paste("Cluster", 1:4),
+       col = c("pink", "hotpink", "blanchedalmond", "orchid"),
+       lty = 1, lwd = 2, bty = "n")
+
+# Answer: Radar plots clearly show how player types differ — attackers, defenders, balanced, physical, etc.
+
+```
