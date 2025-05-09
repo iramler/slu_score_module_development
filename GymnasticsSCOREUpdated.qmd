@@ -1,0 +1,243 @@
+---
+title: "Gymnastics Data"
+author: "Maia Wahlquist"
+format: html
+---
+
+URL: https://bookdown.org/roback/bookdown-BeyondMLR/ch-multilevelintro.html
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(tidyverse)
+library(mosaic)
+library(ggplot2)
+library(forcats)
+
+# Packages required for Chapter 8
+library(MASS)
+library(lme4)
+library(mnormt)
+library(gridExtra)
+library(knitr) 
+library(kableExtra)
+library(lmerTest)
+```
+
+
+## Data set & Wrangling:
+
+```{r}
+library(readr)
+gymnastics <-read_csv("data/data_2022_2023.csv")
+
+
+na.omit(gymnastics$Apparatus)
+na.omit(gymnastics$D_Score)
+na.omit(gymnastics$E_Score)
+na.omit(gymnastics$Penalty)
+na.omit(gymnastics$Score)
+```
+
+```{r}
+as.factor(gymnastics$Apparatus) # making sure Apparatus is a factor variable
+
+gymnastics$Apparatus = fct_recode(gymnastics$Apparatus, "HB" = "hb") # recoding hb to HB to join the rows under the same apparatus name 
+```
+
+```{r}
+gymnasticsfinal = gymnastics |> dplyr::select(c(LastName:Score,-Location, -Date)) |> # keep the relevant rows only
+  group_by(LastName, Apparatus) |> 
+  summarise(D_Mean = mean(D_Score), # Difficulty mean
+            E_Mean = mean(E_Score), # Execution mean
+            S_Mean = mean(Score)) # Final score mean
+```
+
+## Exploring the Data
+
+```{r}
+ggplot(data = gymnasticsfinal, aes(x =  Apparatus, y =S_Mean)) + # now with "hb" recoded as "HB" and joined
+  geom_boxplot(color = "purple4", fill = "plum") +
+  coord_flip() +
+  labs(y = "Average Final Score", 
+       title = "Apparatus vs Average Final Score")
+```
+
+As seen in the boxplot, there are a number of outliers, particularly on the left in the lower scoring region. This doesn't exactly surprise me because gymnastics tends to involve a lot of slip-ups. Consistency is difficult to achieve and is often only seen at the highest levels of gymnastics.
+
+# Exploring VT1, VT2, and VT
+
+```{r}
+vaultdata = gymnasticsfinal |> filter(Apparatus == "VT1" | Apparatus == "VT2") |> # reducing to only vault
+  group_by(LastName) |>
+  mutate(VT_Mean = mean(S_Mean)) # finding the vault mean
+
+```
+
+## Final step in data wrangling
+
+```{r}
+complete = full_join(gymnasticsfinal, vaultdata, by = "LastName") # joining both data frames to be complete
+complete |> dplyr::select(c(LastName:VT_Mean, - Apparatus.y))
+```
+
+
+## Models
+
+# Predicting Execution Score (Mean) Based on Difficulty Score (Mean) for the *gymnasticsfinal* data.
+
+```{r}
+mod1 = lm(E_Mean ~ D_Mean, data = gymnasticsfinal)
+
+summary(mod1) 
+```
+
+```{r}
+anova(mod1)
+```
+
+As seen in the extremely small p-value ($2.2e^{-16}$) in the model summary and ANOVA summary, Execution Mean (E_Mean) is an effective variable in predicting Difficulty Mean (D_Mean).
+
+# Predicting Overall Score (Mean) Based on Execution and Difficulty Score (Means)
+
+```{r}
+mod2 = lm(S_Mean ~ E_Mean + D_Mean, data = gymnasticsfinal)
+
+summary(mod2)
+```
+
+```{r}
+anova(mod2)
+```
+
+Here, we see, again, very small p-values ($2.2e^{-16}$) in both the model summary and the ANOVA table. This indicates that Execution Mean and Difficulty Mean are effective in predicting the Overall Score mean!
+
+```{r}
+mod3 = lm(S_Mean ~ D_Mean, data = gymnasticsfinal)
+
+summary(mod3)
+```
+
+```{r}
+anova(mod3)
+```
+
+Finally, in this model, we see that Difficulty Mean is an effective predictor of Overall Score Mean ($p-value = 2.2e^{-16}$)
+
+# Plotting for Visualization
+
+```{r}
+ggplot(data = gymnasticsfinal, aes(x = E_Mean, y =S_Mean)) + # Execution to predict score 
+  geom_point() + # scatterplot  
+  geom_smooth() # includes the smoother line 
+```
+
+```{r}
+ggplot(data = gymnasticsfinal, aes(x = D_Mean, y= S_Mean)) + # Difficulty to predict score
+  geom_point() +
+  geom_smooth() 
+```
+
+```{r}
+ggplot(data = gymnasticsfinal, aes(x = D_Mean, y = E_Mean)) + # Difficulty to predict execution
+  geom_point() +
+  geom_smooth() 
+```
+
+## 8.6: Building a Multi-Level Model
+
+# Random Slopes and Intercepts Model
+
+```{r}
+mod1 = lmer(S_Mean ~ E_Mean + (1|LastName), data = gymnasticsfinal)
+
+summary(mod1)
+```
+
+This output shows a correlation of fixed effects of -0.973. This is an extremely powerful correlation given its proximity to 1. Again, we have significant p-values ($2e^{-16}$), thus indicating a very strong fixed effect coming from *LastName.*
+
+## FINAL MODEL
+
+```{r}
+modfinal = lmer(S_Mean ~ E_Mean + D_Mean + E_Mean:D_Mean + I(D_Mean ^ 2) + E_Mean:I(D_Mean^2) + (1|LastName),
+            data = gymnasticsfinal) 
+
+# roughly a complete second order model without the square on E_Mean in the interaction
+
+summary(modfinal)
+```
+
+This summary is showing us the correlation of fixed effects for all of the predictors. We see that all of them have significantly large correlations, some being negative and some positive, but all close to 1 (in the $\pm0.9$ range).
+
+```{r}
+plot(S_Mean ~ E_Mean + D_Mean +
+       E_Mean:D_Mean + I(D_Mean ^ 2) +
+       E_Mean:I(D_Mean^2),
+     data = gymnasticsfinal)
+```
+
+```{r}
+ggplot(data = gymnasticsfinal, aes(x = D_Mean, y = S_Mean)) +
+  geom_point() +
+  geom_smooth(method = "lm", col = "hotpink", lwd = 1)
+```
+
+
+# Add D_Mean as a Second Level Two Covariate
+
+```{r}
+mod3 = lmer(S_Mean ~ E_Mean + D_Mean + E_Mean:D_Mean + (D_Mean|LastName), data = gymnasticsfinal)
+summary(mod3)
+```
+
+# Doing the Same for E_Mean
+  
+```{r}
+mod4 = lmer(S_Mean ~ E_Mean + D_Mean + E_Mean:D_Mean + (E_Mean|LastName), data = gymnasticsfinal)
+summary(mod4)
+```
+
+## Interpretation of Parameter Estimates from *modfinal*
+
+**Reminder:**
+
+```{r}
+modfinal = lmer(S_Mean ~ E_Mean + D_Mean + E_Mean:D_Mean + I(D_Mean ^ 2) + E_Mean:I(D_Mean^2) + (1|LastName),
+            data = gymnasticsfinal) 
+```
+
+```{r}
+summary(modfinal)
+```
+
+**Standard Linear Model as Opposed to lmer:** (without the fixed effect *(1|LastName)*)
+
+```{r}
+modfinal2 = lm(S_Mean ~ E_Mean + D_Mean + E_Mean:D_Mean + I(D_Mean ^ 2) + E_Mean:I(D_Mean^2),
+            data = gymnasticsfinal)
+```
+
+```{r}
+summary(modfinal2)
+```
+
+
+**Intercept:** According to the model, the baseline Overall Score Mean before considering any predictors is -6.97409, which doesn't make a lot of sense because an overall score cannot be negative.
+
+**E_Mean:** As Execution Mean increases by one, the Overall Score Mean increases by 1.66.
+
+**D_Mean:** As Difficulty Mean increases by one, the Overall Score Mean increases by 3.80.
+
+## Model Comparisons
+
+```{r}
+aov1 = anova(mod4, mod3, test = "Chisq")
+
+aov1
+```
+
+```{r}
+
+```
+
+
